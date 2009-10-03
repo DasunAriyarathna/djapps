@@ -1,0 +1,44 @@
+
+Alias /djutils      "@DJAPPS_ROOT@/djapps/utils"
+Alias /djwidgets    "@DJAPPS_ROOT@/djapps/widgets"
+Alias /djwebfs      "@DJAPPS_ROOT@/djapps/webfs"
+
+# 
+# Remove in production - MaxRequestsPerChild ONLY to be used
+# for debugging and in testing
+#
+MaxRequestsPerChild 1
+
+<Directory "@DJAPPS_ROOT@/djapps/utils">
+    # Options Indexes FollowSymLinks
+    # AuthType Basic
+    # AuthName "Password Required"
+    # AuthUserFile @APACHE_HTPASSWD_DIR@/djapps.htpassword
+    # Require user sri elias
+    Order allow,deny
+    allow from all
+    satisfy any
+</Directory>
+
+<Directory "@DJAPPS_ROOT@/djapps/widgets">
+    # Options Indexes FollowSymLinks
+    # AuthType Basic
+    # AuthName "Password Required"
+    # AuthUserFile @APACHE_HTPASSWD_DIR@/djapps.htpassword
+    # Require user sri elias
+    Order allow,deny
+    allow from all
+    satisfy any
+</Directory>
+
+<Directory "@DJAPPS_ROOT@/djapps/webfs">
+    # Options Indexes FollowSymLinks
+    # AuthType Basic
+    # AuthName "Password Required"
+    # AuthUserFile @APACHE_HTPASSWD_DIR@/djapps.htpassword
+    # Require user sri elias
+    Order allow,deny
+    allow from all
+    satisfy any
+</Directory>
+

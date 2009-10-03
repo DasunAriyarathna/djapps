@@ -1,0 +1,127 @@
+
+<html>
+<head>
+<title>User Registration Page</title>
+<style type="text/css">
+.HeadingCell
+{
+    font-weight:    bold;
+    vertical-align: top;
+    width:          200px;
+    padding:    10px;
+}
+
+.ValueCell
+{
+    padding:    10px;
+}
+
+</style>
+
+<script language=javascript>
+
+String.prototype.trim = function() { return this.replace(/^\s+|\s+$/, ''); };
+var EmailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+
+// 
+// Validates the form
+//
+// Checks for empty fields,
+// already taken usernames,
+// email validity
+//
+function ValidateForm(form)
+{
+    form.username.value             = form.username.value.trim();
+    form.email.value                = form.email.value.trim();
+    form.first_name.value           = form.first_name.value.trim();
+    form.last_name.value            = form.last_name.value.trim();
+    form.word_verification.value    = form.word_verification.value.trim();
+
+    if (form.username.value.length == 0)
+    {
+        alert("Username cannot be empty.");
+        form.username.focus();
+        return false;
+    }
+
+    if (form.email.value.length == 0)
+    {
+        alert("Email cannot be empty.");
+        form.email.focus();
+        return false;
+    }
+
+    if ( ! EmailFilter.test(form.email.value))
+    {
+        alert("Email is invalid.");
+        form.email.focus();
+        return false;
+    }
+
+    if (form.password1.value.length == 0)
+    {
+        alert("Password cannot be empty.");
+        form.password1.focus();
+        return false;
+    }
+
+    if (form.password1.value != form.password2.value)
+    {
+        alert("Passwords do not match.");
+        form.password2.focus();
+        return false;
+    }
+
+    return true;
+}
+
+</script>
+</head>
+<body>
+{% if has_account %}
+
+<center><h3>Account Exists</center>
+Your account already exists.  At this time we do not allow multiple
+accounts on the same email.  Please select a different email address.
+
+<p>
+Thank you.
+
+{% else %}
+{% if context %}
+
+<center><h3>Thank you for Registering</center>
+An email has been sent to your nominated email address for verification.
+Please follow the instructions in the email to complete and confirm your
+registration.
+
+<p>
+Once your registration is complete, you will be ready to <a href={{context.href_uri.login}}>Log In</a>
+
+{% else %}
+{% if errors %}
+
+<center><h3>Errors Found<h3></center>
+<p>
+Username - {{ errors.username }} <br>
+Email - {{ errors.email }} <br>
+First Name - {{ errors.first_name }} <br>
+Last Name - {{ errors.last_name }} <br>
+Password1 - {{ errors.password1 }} <br>
+Password2 {{ errors.password2 }} <br>
+Captcha - {{ errors.captcha }} <br>
+
+<!--
+{% for error in errors %}
+{% endfor %}
+-->
+
+{% endif %}
+{% endif %}
+{% endif %}
+
+</body>
+</html>
+
