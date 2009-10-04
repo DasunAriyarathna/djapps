@@ -13,4 +13,4 @@ zip -r $ZIPNAME django/conf -x 'django/conf/locale/*'
 zip -r $ZIPNAME django/contrib/__init__.py \
        django/contrib/formtools
 cd -
-mv $1/$ZIPNAME ../
+mv $1/$ZIPNAME $1/../
