@@ -140,9 +140,9 @@ def account_login(request,
         if username and password:
             login_user = api.authenticate(request, username, password)
             if login_user is None:
-                raise ValidationError("Please enter a correct username and password. Note that both fields are case-sensitive.")
+                return api_result(-1, "Authentication failed.")
             elif not login_user.is_active:
-                raise ValidationError("This account is inactive.")
+                return api_result(-1, "Account is inactive.")
             else:
                 # Light security check -- make sure redirect_to isn't garbage.
                 if not redirect_to or ' ' in redirect_to:

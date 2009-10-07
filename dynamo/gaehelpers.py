@@ -108,10 +108,7 @@ def delete_all_objects(obj_class, num_del = 300, **filters):
 def get_objects(obj_class, **kwds):
     query = obj_class.all()
     for kwd in kwds:
-        count = query.count()
         query.filter("%s = " % kwd, kwds[kwd])
-
-    count = query.count()
     return query.fetch(query.count())
 
 # 
