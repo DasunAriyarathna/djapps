@@ -89,9 +89,8 @@ def get_object_id(obj):
 def set_object_bob_data(obj, data):
     if not obj.bob:
         obj.bob = _new_bob()
-        obj.save()
-
-    _set_bob_data(obj.bob, data)
+    saved_objects = _set_bob_data(obj.bob, data)
+    save_objects(obj, obj.bob, *saved_objects)
 
 # 
 # Gets the value of a "bob" property of any object
@@ -106,6 +105,13 @@ def get_object_bob_data(obj):
 def get_counter(name):
     counter, new_created = dnmod.DJCounter.objects.get_or_create(name = name)
     return counter.count;
+
+def delete_counter(name):
+    try:
+        counter = dnmod.DJCounter.objects.get(name = name)
+        counter.delete()
+    except dnmod.DJCounter.DoesNotExist, dne:
+        pass
 
 def increment_counter(name, incr = 1):
     counter, new_created = dnmod.DJCounter.objects.get_or_create(name = name)
@@ -124,6 +130,7 @@ def set_attr(obj, attrib_name, value):
     class_name = "%s.%s" % (obj.__module__, obj.__class__.__name__)
     attrib = _get_or_create_attribute(class_name, obj.id, attrib_name)
 
+    saved_objects = []
     if type(value) == bool or type(value) == int or type(value) == float:
         attrib.value = str(value)
         if type(value) == bool:
@@ -134,12 +141,7 @@ def set_attr(obj, attrib_name, value):
             attrib.attrib_type = dnmod.DJAttribute.ATTRIB_TYPE_FLOAT
     else:
         attrib.attrib_type   = dnmod.DJAttribute.ATTRIB_TYPE_BOB
-        if not attrib.bob:
-            attrib.bob = _new_bob()
-            attrib.bob.save()
-
-        _set_bob_data(attrib.bob, value)
-
+        set_object_bob_data(attrib, value)
     attrib.save()
 
 # 
@@ -160,20 +162,17 @@ def get_attr(obj, attrib_name, default_val = None):
             return _get_bob_data(attrib.bob)
     except dnmod.DJAttribute.DoesNotExist, err:
         logging.debug("========== Attribute %s does not exist" % attrib_name)
-        return default_val
+
+    return default_val
 
 # 
 # Create a new "dynamic" object instance
 #
 def _get_or_create_attribute(obj_class, obj_id, attrib_name):
-    try:
-        return dnmod.DJAttribute.objects.get(obj_class = obj_class,
-                                            obj_id = obj_id,
-                                            attrib_name = attrib_name)
-    except dnmod.DJAttribute.DoesNotExist:
-        return dnmod.DJAttribute.objects.create(obj_class = obj_class,
-                                                obj_id = obj_id,
-                                                attrib_name = attrib_name)
+    new_attrib, new_created = dnmod.DJAttribute.objects.get_or_create(obj_class = obj_class,
+                                                                     obj_id = obj_id,
+                                                                     attrib_name = attrib_name)
+    return new_attrib
 
 #################################################################################
 #           Private Django specific stuff to create/change bobs                 #
@@ -183,16 +182,14 @@ def _get_or_create_attribute(obj_class, obj_id, attrib_name):
 # Creates a new BOB
 #
 def _new_bob():
-    bob = dnmod.DJBOB(num_fragments = 0)
-    bob.save()
-    return bob
+    return dnmod.DJBOB(num_fragments = 0)
 
 # 
 # gets the data within all the bob fragments of a bob
 #
 def _get_bob_data(bob):
     if bob:
-        frags   = dnmod.DJBOBFragment.objects.filter(parent = bob).order_by("fragment")
+        frags   = dnmod.DJBOBFragment.objects.filter(bob = bob).order_by("fragment")
         bobdata = "".join([f.contents for f in frags])
         return bobdata
     else:
@@ -201,12 +198,14 @@ def _get_bob_data(bob):
 # 
 # Sets the data within all the bob fragments of a bob
 # Can only pass in string data here.
+# Returns all the fragments so we dont save it here and let the 
+# caller save it in one go
 #
 def _set_bob_data(bob, data_str):
     # 
     # delete previous fragments
     #
-    dnmod.DJBOBFragment.objects.filter(parent = bob).delete()
+    dnmod.DJBOBFragment.objects.filter(bob = bob).delete()
 
     # 
     # recreate fragments
@@ -217,10 +216,11 @@ def _set_bob_data(bob, data_str):
     str_val     = data_str
     part1       = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
     fragindex   = 0
+    output      = []
 
     while part1 != "":
-        fragment = dnmod.DJBOBFragment(parent = bob, fragment = fragindex, contents = part1)
-        fragment.save()
+        fragment = dnmod.DJBOBFragment(bob = bob, fragment = fragindex, contents = part1)
+        output.append(fragment)
 
         str_val = str_val[dnmod.DJBOBFragment.MAX_BOB_SIZE : ]
         part1 = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
@@ -228,7 +228,7 @@ def _set_bob_data(bob, data_str):
         fragindex += 1
 
     bob.num_fragments = fragindex
-    bob.save()
+    return output
 
 #################################################################################
 #                           Creating Dynamic Models                             #

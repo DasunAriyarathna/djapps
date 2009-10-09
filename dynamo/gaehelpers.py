@@ -58,7 +58,7 @@ def get_or_create_object(obj_class, save = True, parent = None, id_val = None, *
     query = obj_class.all()
     for kwd in kwds:
         if query.count() > 0:
-            query.filter("%s = " % kwd, kwds[kwd])
+            query = query.filter("%s = " % kwd, kwds[kwd])
 
     if query.count() > 0:
         return query.fetch(1)[0], False
@@ -83,24 +83,32 @@ def delete_objects(objs):
 
 def delete_all_objects(obj_class, num_del = 300, **filters):
     while True:
-        if False:
-            objs = obj_class.all().fetch(num_del)
-        else:
-            objs = db.GqlQuery("SELECT __key__ FROM " + obj_class.__name__).fetch(num_del)
-            objs = [item for item in objs]
+        querystr = "SELECT __key__ FROM %s " % obj_class.__name__
+        count = 1
+        values = []
+        for filter in filters:
+            if count == 1: querystr += " where "
+            else: querystr += " and "
+
+            querystr += " %s = :%s " % (filter, filter)
+        objs = db.GqlQuery(querystr, **filters).fetch(num_del)
+        objs = [item for item in objs]
 
         num_objs = len(objs)
-        if num_objs == 0: return
-        if num_del > num_objs: num_del = num_objs
-        print "Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class))
-        count = 0
-        while count < 20:
-            try:
-                db.delete(objs)
-                count = 20
-            except db.Timeout:
-                print "Timeout error - continuing %d..." % count
-                count += 1
+        if num_objs == 0:
+            # no objects left so return
+            return
+        else:
+            if num_del > num_objs: num_del = num_objs
+            print "Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class))
+            count = 0
+            while count < 5:
+                try:
+                    db.delete(objs)
+                    count = 5
+                except db.Timeout:
+                    print "Timeout error - continuing %d..." % count
+                    count += 1
 
 # 
 # Returns objects with given attribs
@@ -172,8 +180,10 @@ def increment_counter(name, incr = 1):
         return counter.count
     new_count = db.run_in_transaction(txn)
     from google.appengine.api import memcache
+    #
     # if memcache.get(name) is None: memcache.set(name, incr)
     # else: memcache.incr(name, incr)
+    #
     return new_count
 
 def increase_shards(name, num):
@@ -192,13 +202,22 @@ def increase_shards(name, num):
 # Set template's data
 #
 def set_object_bob_data(obj, data):
-    obj.bob = db.Blob(data)
+    # do not use Blobs as we have a limit of 1000 blobs and files!!!
+    # so use custom bob's - reads are cheap anyway and doing partial reads
+    # are cheap anyway
+    # obj.bob = db.Blob(data)
+    if not obj.bob:
+        obj.bob = _new_bob()
+    saved_objects = _set_bob_data(obj.bob, data)
+    save_objects(obj, obj.bob, *saved_objects)
 
 # 
 # Gets the value of a "bob" property of any object
 #
 def get_object_bob_data(obj):
-    return obj.bob
+    # again not using blobs thanks to the 1000 blob limit
+    # return obj.bob
+    return _get_bob_data(obj.bob)
 
 #################################################################################
 #               All extendible attribute-related helper methods                 #
@@ -206,8 +225,6 @@ def get_object_bob_data(obj):
 
 # 
 # Set the value of an object's attribute
-# TODO: this should simply set the attribute as is - since we can safely
-# assume that obj extends an Expando model
 #
 def set_attr(obj, attrib_name, value):
     class_name = "%s.%s" % (obj.__module__, obj.__class__.__name__)
@@ -222,15 +239,13 @@ def set_attr(obj, attrib_name, value):
         else:
             attrib.attrib_type = dnmod.DJAttribute.ATTRIB_TYPE_FLOAT
     else:
-        attrib.attrib_type  = dnmod.DJAttribute.ATTRIB_TYPE_BOB
-        attrib.bob          = Blob(value)
-
-    attrib.save()
+        # attrib.bob          = Blob(value)
+        attrib.attrib_type   = dnmod.DJAttribute.ATTRIB_TYPE_BOB
+        set_object_bob_data(attrib, value)
+    db.put(attrib)
 
 # 
 # Gets the object attributes
-# TODO: this should simply get the attribute as is - since we can safely
-# assume that obj extends an Expando model
 #
 def get_attr(obj, attrib_name, default_val = None):
     class_name = "%s.%s" % (obj.__module__, obj.__class__.__name__)
@@ -243,7 +258,9 @@ def get_attr(obj, attrib_name, default_val = None):
         elif attrib.attrib_type == dnmod.DJAttribute.ATTRIB_TYPE_FLOAT:
             return float(attrib.value)
         else:
-            return attrib.bob
+            return _get_bob_data(attrib.bob)
+    else:
+        logging.debug("========== Attribute %s does not exist" % attrib_name)
 
     return default_val
 
@@ -254,4 +271,63 @@ def _get_or_create_attribute(obj_class, obj_id, attrib_name):
     return dnmod.DJAttribute.get_or_insert(obj_class = obj_class,
                                           obj_id = obj_id,
                                           attrib_name = attrib_name)
+
+#################################################################################
+#               Private GAE specific stuff to create/change bobs                #
+#################################################################################
+
+# 
+# Creates a new BOB
+#
+def _new_bob():
+    return dnmod.DJBOB(num_fragments = 0)
+
+# 
+# gets the data within all the bob fragments of a bob
+#
+def _get_bob_data(bob):
+    if bob:
+        query = GqlQuery("SELECT * from DJBOBFragment where bob = :bob", bob = bob)
+        query.order("fragment")
+        frags  = query.fetch(query.count())
+        return "".join([f.contents for f in frags])
+    else:
+        return ""
+
+# 
+# Sets the data within all the bob fragments of a bob
+# Can only pass in string data here.
+# Returns all the fragments so we dont save it here and let the 
+# parent save it in one go
+#
+def _set_bob_data(bob, data_str):
+    # 
+    # delete previous fragments.
+    # This is unnecessary really since we can "override" fragments instead
+    # of deleting and recreating
+    #
+    delete_all_objects(dnmod.DJBOBFragment, bob = bob)
+
+    # 
+    # recreate fragments
+    #
+    # TODO: be smart about it and only delete fragments 
+    # that are over the size.
+    #
+    str_val     = data_str
+    part1       = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
+    fragindex   = 0
+    output      = []
+
+    while part1 != "":
+        fragment = dnmod.DJBOBFragment(bob = bob, fragment = fragindex, contents = part1)
+        output.append(fragment)
+
+        str_val = str_val[dnmod.DJBOBFragment.MAX_BOB_SIZE : ]
+        part1 = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
+
+        fragindex += 1
+
+    bob.num_fragments = fragindex
+    return output
 
