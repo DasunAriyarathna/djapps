@@ -1,0 +1,666 @@
+
+//
+// The main template for the file selector control
+//
+var FSTemplate = {
+    nameid: 'contentHolder',
+    style: {width: '100%', height: '100%'},
+    kids: [
+    { 
+        nameid: 'buttonPanelDiv',
+        style: {width: '100%'},
+        notify: true, 
+        type: "center",
+        kids: [
+        { nameid: "fsUpButton", type: "input", notify: true, attr: {type: 'button', value: "Up"}},
+        { nameid: "fsHomeButton", type: "input", notify: true, attr: {type: 'button', value: "Home"}},
+        { nameid: "fsNewButton", type: "input", notify: true, attr: {type: 'button', value: "New"}},
+        { nameid: "fsDeleteButton", type: "input", notify: true, attr: {type: 'button', value: "Delete"}},
+        { nameid: "fsUploadButton", type: "input", notify: true, attr: {type: 'button', value: "Upload"}}
+        ]
+    },
+    { nameid: 'currPathDiv', notify: true },
+    { nameid: 'fileDetailsDiv', notify: true },
+    {
+        nameid: 'fileContentsDiv',
+        kids: [
+        {
+            nameid: 'fileContentsTable',
+            type: 'table',
+            notify: true,
+            style: { width: '100%' },
+            kids: [
+            {
+                type: 'tr',
+                kids: [
+                {
+                    type: 'td',
+                    style: {width: '80px'},
+                    kids: [ {type: "label", attr: {'for': 'fsFileName'}, kids: ["Name: "]}]
+                },{
+                    type: 'td',
+                    kids: [{
+                        nameid: 'fsFileName', notify: true,
+                        type: "input", attr: {type: 'text'}, style: {width: '100%'}
+                    }]
+                }]
+            },{ 
+                type: 'tr',
+                kids: [
+                {
+                    type: 'td',
+                    style: {width: '80px'},
+                    kids: [ {type: "label", attr: {'for': 'fsFileType'}, kids: ["Type: "]}]
+                },
+                {
+                    type: 'td',
+                    kids: [{
+                        nameid: 'fsFileType', notify: true,
+                        type: "select", style: {width: '100%'}
+                    }]
+                }]
+            }]
+        }]
+    }]
+};
+
+// 
+// Template for display the file list in a tabular fashion
+//
+var FSFileContents = {
+    type: "center",
+    kids: [{
+        type: "table", notify: true, style: {border: 2, width: "90%"},
+        kids: [{
+            type: "thead",
+            kids: [{
+                type: "tr",
+                kids: [
+                { type: "td", style: {'text-align': "center", width: "60%"}, kids: [ "File/Folder" ] },
+                { type: "td", style: {'text-align': "center"}, kids: [ "Options" ] },
+                { type: "td", style: {'text-align': "center"}, kids: [ "Size" ] },
+                { type: "td", style: {'text-align': "center"}, kids: [ "Date Created" ] },
+                { type: "td", style: {'text-align': "center"}, kids: [ "Date Modified" ] }
+                ]
+            }]
+        }]
+    }]
+};
+
+//
+// A row in the file contents
+//
+var FSFileContentsRow = {
+};
+
+// 
+// FS Listener interface:
+//
+function FSListener()
+{
+    // Called before the path in the FS is changed
+    this.FSPathChanging = function(fs) { }
+
+    // Called after the path has chagned
+    this.FSPathChanged = function(fs) { }
+
+    // Called to indicate that folder listing has failed
+    this.FSListingFailed = function(fs, path) { }
+}
+
+// 
+// Creates a new file dialog and returns a handle to it
+//
+function FileSelector(parent, fsName, fsListener)
+{
+    // is the dialog showing?
+    this.IsShowing = function()
+    {
+        return this.isShowing;
+    }
+
+    // Show or hide the dialog
+    this.Show = function(visible)
+    {
+        this.isShowing = visible;
+        if (visible)
+        {
+            this.parent.style.visibility = "visible";
+        }
+        else
+        {
+            this.parent.style.visibility    = "none";
+            this.parent.style.display       = "none";
+        }
+
+        // var win = window;
+        // window.styles['background-color'] = "black";
+    }
+
+    // 
+    // Sets a given path
+    //
+    this.SetPath = function(path)
+    {
+        return this._listFolder(path);
+    }
+
+    // 
+    // Return the selected folder
+    //
+    this.SelectedFolder = function()
+    {
+        return this.currentFolder;
+    }
+
+    // 
+    // Return the selected filename
+    //
+    this.SelectedFile = function()
+    {
+        return this.fsFileName.value;
+    }
+
+    // 
+    // Return the full path of the selected item
+    //
+    this.SelectedPath = function()
+    {
+        var selFolder   = this.SelectedFolder();
+        var selFile     = this.SelectedFile();
+
+        if (selFolder == null)
+        {
+            if (selFile == null)
+                return null;
+
+            selFolder = "";
+        }
+
+        if (selFile == null)
+            selFile = ""
+
+        return selFolder + selFile;
+    }
+
+    /////////////////////////////////////////////////////////////////
+    //                      Private Functions
+    /////////////////////////////////////////////////////////////////
+
+    //
+    // List the contents of a given folder
+    //
+    this._listFolder = function(path)
+    {
+        var theFSObj = this;
+
+        // 
+        // Process the folder contents received from the server
+        //
+        function ProcessFolders(request)
+        {
+            if (request.readyState == 4)
+            {
+                if (request.status == 200)
+                {
+                    var list = eval("(" + request.responseText + ")");
+                    list = list.success.value
+
+                    theFSObj._showCurrentPath(path);
+                    theFSObj.folderContents             = list;
+                    theFSObj.fileDetailsDiv.innerHTML   = "";
+
+                    var theTable = null;
+
+                    // register a call back to see what the "table" is
+                    // so we can add rows to it
+                    var func = function(node) { theTable = node; }
+                    theFSObj.fileDetailsDiv.appendChild(Build(FSFileContents, {nodeCreated: func}));
+
+                    for (var i = 0;i < list.length;i++)
+                    {
+                        // theTable.appendChild(Build(FSFileContentsRow, {item: list[i], fsObj: theFSObj}));
+                        var item = list[i];
+                        var itemname = item.name;
+                        var row = CreateEl("tr", null, null);
+                        row.cells[0] = CreateEl("td", null, null, row);
+
+                        var delCheck = CreateEl("input",
+                                                {'type': 'checkbox',
+                                                 id: "deleteItem_" + i,
+                                                 value: false});
+                        row.cells[0].appendChild(delCheck);
+                        row.cells[0].appendChild(document.createTextNode(" "));
+
+                        // 
+                        // Create a handler for the checkbox
+                        //
+                        var checkHandler = function(checkBox, listitem) {
+                                                return function(ev) {
+                                                    listitem.markedForDelete = checkBox.checked; }
+                                            }(delCheck, item);
+                        AddEventListener(delCheck, "change", checkHandler);
+
+                        if (item.isdir)
+                        {
+                            var link = row.cells[0].appendChild(CreateLink("[" + itemname + "]"));
+                            var evhandler = function(_itemname_)
+                                            {
+                                                return function(ev) { theFSObj._listFolder(path + "/" + _itemname_); }
+                                            }(itemname);
+                            AddEventListener(link, "click", evhandler);
+                        }
+                        else
+                        {
+                            var link = row.cells[0].appendChild(CreateLink(itemname));
+                            var evhandler = function(_itemname_)
+                                            {
+                                                return function(ev) { theFSObj._setSelection(_itemname_); }
+                                            }(itemname);
+                            AddEventListener(link, "click", evhandler);
+                        }
+                        row.cells[1] = CreateEl("td", null, null, row);
+                        // CreateLink("D", null, null, null, row.cells[1]);
+                        // row.cells[1].appendChild(document.createTextNode(" "));
+                        CreateLink("R", null, null, null, row.cells[1]);
+
+                        if ( ! item.isdir)
+                        {
+                            row.cells[1].appendChild(document.createTextNode(" "));
+                            CreateLink("V", null, null, null, row.cells[1]);
+                        }
+                        row.cells[2] = CreateEl("td", null, {'textAlign': 'center'}, row);
+                        row.cells[2].appendChild(document.createTextNode(item.size));
+                        row.cells[3] = CreateEl("td", null, {'textAlign': 'center'}, row);
+                        row.cells[3].appendChild(document.createTextNode(item.created));
+                        row.cells[4] = CreateEl("td", null, {'textAlign': 'center'}, row);
+                        row.cells[4].appendChild(document.createTextNode(item.modified));
+
+                        theTable.rows[i + 1] = row;
+                    }
+
+                    //
+                    // Notify listeners that our path change trial has finished
+                    //
+                    if (theFSObj.fsListener && theFSObj.fsListener.FSPathChanged)
+                    {
+                        theFSObj.fsListener.FSPathChanged(theFSObj);
+                    }
+                }
+                else
+                {
+                    theFSObj.fileDetailsDiv.innerHTML = "Listing failed: " + request.responseText;
+
+                    //
+                    // Notify listeners that our path change trial has finished
+                    //
+                    if (theFSObj.fsListener && theFSObj.fsListener.FSListingFailed)
+                    {
+                        theFSObj.fsListener.FSListingFailed(theFSObj, path);
+                    }
+                }
+            }
+        }
+
+        //
+        // Notify listeners that path is about to changing
+        // No Guarantee that path will change - merely we will try.
+        //
+        if (this.fsListener && the.fsListener.FSPathChanging)
+        {
+            this.fsListener.FSPathChanging(this);
+        }
+
+        this.fileDetailsDiv.innerHTML = "Waiting for reply from server...";
+        return MakeAjaxRequest("GET", "/testzone/list/" + path + "/", ProcessFolders);
+    }
+
+    //
+    // Initialises the file dialog
+    //
+    this._initialise = function(par, fsName, fsListener)
+    {
+        if (par == null)
+        {
+            var args='width=350,height=125,left=325,top=300,toolbar=0,';
+                      args+='location=0,status=0,menubar=0,scrollbars=1,resizable=0';
+            var wnd = window.open("", "File Dialog", args);
+            var doc = wnd.document;
+
+            doc.open("text/html");
+            doc.write("<html>");
+            doc.write("<head>");
+            doc.write("<script src='/djutils/js/ajax.js'>");
+            doc.write("<script src='/djutils/js/fdialog.js'>");
+            doc.write("<script src='/djutils/js/dialogs.js'>");
+            doc.write("</head>");
+            doc.write("<body>");
+            doc.write("</body>");
+            doc.write("</html>");
+            doc.close();
+
+            var timeout = 0;
+
+            // wait till doc.body is finalised!
+            // while (doc.body == null) { setTimeout("", 100); }
+
+            par = doc.body;
+
+            //var headEl = CreateEl("head");
+            //headEl.appendChild(CreateEl("script", {src: '/djutils/js/common.js'}));
+            //headEl.appendChild(CreateEl("script", {src: '/djutils/js/fsialog.js'}));
+            //headEl.appendChild(CreateEl("script", {src: '/djutils/js/dialogs.js'}));
+            //doc.documentElement.appendChild(headEl);
+
+            var a = 0;
+        }
+
+        this.parent = par;
+
+        if (typeof(par) == "string")
+        {
+            this.parent         = ElementById(par);
+        }
+
+        // A unique way to identify the file dialog
+        this.fsName         = fsName;
+        this.fsID           = fsName;
+        this.isShowing      = false;
+        this.isShowing      = false;
+        this.pathStack      = [];
+        this.folderContents = [];
+        this.currentFolder  = "/";
+        this.fsListener     = fsListener;
+        var theFSObj        = this;
+        var fs_id           = this.fsID;
+
+        var nodeCreatedFunc   =
+            function(node)
+            { 
+                if (node.id == 'fsUpButton')
+                    theFSObj.fsUpButton = node;
+                else if (node.id == 'fsHomeButton')
+                    theFSObj.fsHomeButton = node;
+                else if (node.id == 'fsNewButton')
+                    theFSObj.fsNewButton = node;
+                else if (node.id == 'fsDeleteButton')
+                    theFSObj.fsDeleteButton = node;
+                else if (node.id == 'fsUploadButton')
+                    theFSObj.fsUploadButton = node;
+                else if (node.id == 'fsFileName')
+                    theFSObj.fsFileName = node;
+                else if (node.id == 'fileDetailsDiv')
+                    theFSObj.fileDetailsDiv = node;
+                else if (node.id == 'currPathDiv')
+                    theFSObj.currPathDiv = node;
+                // theFSObj[node.id] = node;
+            }
+
+        this.contentHolder  = Build(FSTemplate, {nodeCreated: nodeCreatedFunc}, null);
+
+        // this.contentHolder  = Build(FSTemplate);
+        // this.contentHolder = CreateDiv();
+        // this.contentHolder.innerHTML = GetFSTemplate({fsid: "fs"});
+
+        this.parent.appendChild(this.contentHolder);
+
+        // this.fsUpButton     = Find(this.contentHolder, "buttonPanelDiv.fsUpButton");
+        // this.fsHomeButton   = Find(this.contentHolder, "buttonPanelDiv.fsHomeButton");
+        // this.fsNewButton    = Find(this.contentHolder, "buttonPanelDiv.fsNewButton");
+        // this.fsDeleteButton = Find(this.contentHolder, "buttonPanelDiv.fsDeleteButton");
+        // this.fsUploadButton = Find(this.contentHolder, "buttonPanelDiv.fsUploadButton");
+        // this.fsFileName     = Find(this.contentHolder, "
+
+        // Add button handlers
+        AddEventListener(this.fsUpButton, "click", function(ev) { theFSObj._upHandler(ev); }, false);
+        AddEventListener(this.fsHomeButton, "click", function(ev) { theFSObj._homeHandler(ev); }, false);
+        AddEventListener(this.fsNewButton, "click", function(ev) { theFSObj._newHandler(ev); }, false);
+        AddEventListener(this.fsDeleteButton, "click", function(ev) { theFSObj._deleteHandler(ev); }, false);
+        AddEventListener(this.fsUploadButton, "click", function(ev) { theFSObj._uploadHandler(ev); }, false);
+
+        this._setSelection("");
+
+        // finally create a layer we can use to do our own dialogs - 
+        // this is only temporary
+        /*
+        this.dlgParent = CreateDiv(null,
+                                   {position: "absolute",
+                                    'backgroundColor': 'black',
+                                    'MozOpacity': 0.8,
+                                    'text-align': "center",
+                                    'z-index': 10000,
+                                    'visibility': "hidden",
+                                    left: 0, top: 0,
+                                    width: "100%", height: "100%",
+                                   },
+                                   this.contentHolder);
+
+        this.dlgContentDiv = CreateDiv(null,
+                                    {
+                                        width: "300px",
+                                        height: "200px",
+                                        margin: "30px auto",
+                                        'MozOpacity': 1.0,
+                                        "backgroundColor": "#fff",
+                                        border: "1px solid #000",
+                                        padding: "15px"
+                                    },
+                                    this.dlgParent);
+        */
+
+        /*
+        this.dlgContentDiv.appendChild(
+        var table2 = CreateEl("table", {'border': 2, 'width': '90%'}, null, root);
+
+                    table.tHead = CreateEl("thead", null, null, table);
+                    table.tHead.rows[0] = CreateEl("tr", null, null, table.tHead);
+                    table.tHead.rows[0].cells[0] = CreateEl("td", null, {'textAlign': "center", width: '60%'}, table.tHead.rows[0]);
+                    table.tHead.rows[0].cells[1] = CreateEl("td", null, {'textAlign': "center"}, table.tHead.rows[0]);
+                    table.tHead.rows[0].cells[2] = CreateEl("td", null, {'textAlign': "center"}, table.tHead.rows[0]);
+                    table.tHead.rows[0].cells[3] = CreateEl("td", null, {'textAlign': "center"}, table.tHead.rows[0]);
+                    table.tHead.rows[0].cells[4] = CreateEl("td", null, {'textAlign': "center"}, table.tHead.rows[0]);
+
+                    CreateEl("strong", null, null, table.tHead.rows[0].cells[0]).appendChild(document.createTextNode("File/Folder"));
+                    CreateEl("strong", null, null, table.tHead.rows[0].cells[1]).appendChild(document.createTextNode("Options"));
+                    CreateEl("strong", null, null, table.tHead.rows[0].cells[2]).appendChild(document.createTextNode("Size"));
+                    CreateEl("strong", null, null, table.tHead.rows[0].cells[3]).appendChild(document.createTextNode("Date Created"));
+                    CreateEl("strong", null, null, table.tHead.rows[0].cells[4]).appendChild(document.createTextNode("Date Modified"));
+        */
+
+
+        /*
+        this.dlgNewDirDiv = CreateDiv(null, {display: "inline", float: "left", visibility: "hidden"});
+        this.dlgUploadDiv = CreateDiv(null, {display: "inline", float: "left", visibility: "hidden"});
+        this.dlgButtonPanel = CreateDiv(null, {'text-align': 'center'});
+
+        this.dlgContentDiv.appendChild(this.dlgNewDirDiv);
+        this.dlgContentDiv.appendChild(this.dlgUploadDiv);
+        this.dlgContentDiv.appendChild(this.dlgButtonPanel);
+
+        this.dlgOkButton        = CreateEl("input",
+                                            {type: 'button',
+                                            id: fs_id + "DlgOkButton",
+                                            value: 'Ok'});
+        this.dlgCancelButton    = CreateEl("input", 
+                                           {type: 'button',
+                                            id: fs_id + "DlgCancelButton",
+                                            value: 'Cancel'});
+
+        var centerDiv2 = CreateEl("center", null, null);
+
+        centerDiv2.appendChild(this.dlgOkButton);
+        centerDiv2.appendChild(this.dlgCancelButton);
+        this.dlgButtonPanel.appendChild(centerDiv2);
+        */
+    }
+
+    // 
+    // Shows the current path in the file dialog
+    //
+    this._showCurrentPath = function(path)
+    {
+        var folders = path.split("/");
+        var curr    = "/";
+        var theThis = this;
+
+        // clear the html
+        this.currPathDiv.innerHTML = "";
+        this.pathStack = [];
+
+        var node = CreateLink("<home>", null, null, null, this.currPathDiv);
+        this.pathStack.push("/");
+        AddEventListener(node, "click", function(ev) { PreventEventDefault(ev); theThis._listFolder("/"); });
+
+        for (var i = 0; i < folders.length;i++)
+        {
+            var currFolder = folders[i].trim();
+            if (currFolder.length != 0)
+            {
+                curr += (currFolder + "/");
+                this.pathStack.push(curr);
+                this.currPathDiv.appendChild(document.createTextNode("/"));
+                node = CreateLink(currFolder, null, null, null, this.currPathDiv);
+                var evhandler = function(_path_) { return function(ev) { theThis._listFolder(_path_); } }(curr);
+                AddEventListener(node, "click", evhandler);
+            }
+        }
+        
+        this._setSelection("");
+        this.currentFolder  = curr;
+    }
+
+    // 
+    // Sets the currently selected file
+    //
+    this._setSelection = function(path)
+    {
+        this.fsFileName.value   = path;
+    }
+
+    // 
+    // Does a file upload 
+    //
+    this._uploadFile = function()
+    {
+    }
+
+    // 
+    // Cancel handler
+    //
+    this._cancelHandler = function(ev)
+    {
+        if (this.fsListener)
+        {
+            if (this.fsListener.FSHiding && ! this.fsListener.FSHiding(this))
+            {
+                return ;
+            }
+
+            this.Show(false);
+
+            if (this.fsListener.FSHidden)
+                this.fsListener.FSHidden(this);
+        }
+        else
+        {
+            this.Show(false);
+        }
+    }
+
+    // Up button handler
+    this._upHandler = function(ev)
+    {
+        if (this.pathStack && this.pathStack.length >= 2)
+        {
+            var newPath = this.pathStack[this.pathStack.length - 2];
+            this._listFolder(newPath);
+        }
+    }
+
+    // Home button handler
+    this._homeHandler = function(ev)
+    {
+        this._listFolder("/");
+    }
+
+    // New button handler
+    this._newHandler = function(ev)
+    {
+        this.dlgNewDirDiv.style.visibility      = "visible";
+        this.dlgButtonPanel.style.visibility    = "visible";
+        this.dlgParent.style.visibility         = "visible";
+        // alert('You Pressed the new button');
+        // this.dlgParent.style.visibility = "hidden";
+    }
+
+    // Delete button handler
+    this._deleteHandler = function(ev)
+    {
+        var files = "[";
+        for (var i in this.folderContents)
+        {
+            if (this.folderContents[i].markedForDelete)
+            {
+                if (files.length > 1)
+                    files += ", ";
+                files += "'" + escape(this.folderContents[i].name) + "'\n";
+            }
+        }
+        files += "]";
+
+        var fileList = "fileList=" + files;
+
+        var theFSObj = this;
+
+        function ProcessResponse(request)
+        {
+            if (request.readyState == 4)
+            {
+                if (request.status == 200)
+                {
+                    theFSObj._listFolder(theFSObj.currentFolder);
+                }
+                else
+                {
+                    alert('Could not delete folders.');
+
+                    theFSObj._listFolder(this.currentFolder);
+                }
+                var args='width=950,height=725,left=50,top=50,toolbar=0,';
+                    args+='location=0,status=0,menubar=0,scrollbars=1,resizable=0';
+                var wnd = window.open("", "Server Error", args);
+                var doc = wnd.document;
+
+                doc.write(request.responseText);
+            }
+        }
+
+        var httpRequest = GetHttpRequest();
+
+        httpRequest.onreadystatechange = function() { ProcessResponse(httpRequest); }
+
+        // just some URL cleanup
+        if (this.currentFolder == "" || this.currentFolder == "/")
+        {
+            httpRequest.open('DELETE', "/testzone/delete/");
+        }
+        else
+        {
+            httpRequest.open('DELETE', "/testzone/delete/" + this.currentFolder + "/");
+        }
+
+        httpRequest.setRequestHeader("Content-type", "text/text");
+        httpRequest.setRequestHeader("Content-length", fileList.length);
+        httpRequest.setRequestHeader("Connection", "close");
+        httpRequest.send(fileList);
+    }
+
+    // upload button handler
+    this._uploadHandler = function(ev)
+    {
+        alert('You Pressed the upload button');
+    }
+
+    this._initialise(parent, fsName);
+}
+

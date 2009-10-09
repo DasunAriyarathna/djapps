@@ -1,0 +1,11 @@
+
+ # 
+ # dj apps specific templates
+ #
+TEMPLATES   =   [
+    {
+        'input': 'webapps/djapps/config/djapps.conf.in',
+        'output':   'configs/djapps.conf'
+    },
+]
+
