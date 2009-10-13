@@ -1,7 +1,8 @@
 
-import datetime, random, sha, sys, logging
+import datetime, random, sha, sys, logging, urlparse
 from django.conf import settings
 from django.template import RequestContext, loader
+from django.http import HttpResponseRedirect, HttpResponse
 
 import  djapps.utils.decorators     as djdecos
 import  djapps.utils.request        as djrequest
@@ -24,16 +25,17 @@ else:
 
 REDIRECT_FIELD_NAME = "next"
 
-_consumer = None
+consumer_instance = False
 
 def get_consumer(request):
     assert hasattr(request, 'session'), "The openid module requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'gaeutils.middle.middleware.SessionMiddleware' in GAE or 'django.contrib.sessions.middleware.SessionMiddleware' in django."
 
-    if not _consumer:
+    consumer_instance = None
+    if not consumer_instance:
         fetchers.setDefaultFetcher(fetcher.UrlfetchFetcher())
-        _consumer = Consumer(request.session, store.DatastoreStore())
+        consumer_instance = Consumer(request.session, store.DatastoreStore())
 
-    return _consumer
+    return consumer_instance
 
 def openid_login_initiate(request,
                  redirect_field_name = REDIRECT_FIELD_NAME,
@@ -44,12 +46,12 @@ def openid_login_initiate(request,
     if not openid_url:
         return api_result(-1, "OpenID Provider URL Not Specified")
 
-    consumer = get_consumer()
-    if not consumer:
+    the_consumer = get_consumer(request)
+    if not the_consumer:
         return api_result(-1, "Could not create consumer")
 
     try:
-        auth_request = consumer.begin(openid_url)
+        auth_request = the_consumer.begin(openid_url)
     except discover.DiscoveryFailure, e:
         logging.error("Error during OpenID provider discovery: " + str(e))
         return api_result(-1, e)
@@ -57,10 +59,9 @@ def openid_login_initiate(request,
         logging.error("Error parsing XRDS from provider: " + str(e))
         return api_result(-1, e)
 
-    self.session.claimed_id = auth_request.endpoint.claimed_id
-    self.session.server_url = auth_request.endpoint.server_url
-    self.session.store_and_display = self.request.get('display', 'no') != 'no'
-    self.session.put()
+    request.session.claimed_id = auth_request.endpoint.claimed_id
+    request.session.server_url = auth_request.endpoint.server_url
+    request.session.save()
 
     sreg_request = sreg.SRegRequest(optional=['nickname', 'fullname', 'email'])
     auth_request.addExtension(sreg_request)
@@ -70,17 +71,19 @@ def openid_login_initiate(request,
                                  ])
     auth_request.addExtension(pape_request)
 
-    parts = list(urlparse.urlparse(self.request.uri))
-    parts[2] = 'finish'
-    parts[4] = 'session_id=%d' % self.session.key().id()
+    redirect_to = request.REQUEST.get(redirect_field_name, '')
+    parts = list(urlparse.urlparse(request.get_full_path()))
+    print >> sys.stderr, "------------------------------------"
+    print >> sys.stderr, "Parts: ", parts
+    parts[2] = 'openid/login/complete'
+    parts[4] = 'session_id=%s' % request.session.sid
     parts[5] = ''
     return_to = urlparse.urlunparse(parts)
     realm = urlparse.urlunparse(parts[0:2] + [''] * 4)
 
     redirect_url = auth_request.redirectURL(realm, return_to)
     logging.debug('Redirecting to %s' % redirect_url)
-    self.response.set_status(302)
-    self.response.headers['Location'] = redirect_url
+    return HttpResponseRedirect(redirect_url)
 
 
 def openid_login_complete(request):
