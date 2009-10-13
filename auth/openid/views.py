@@ -27,7 +27,7 @@ REDIRECT_FIELD_NAME = "next"
 _consumer = None
 
 def get_consumer(request):
-    assert hasattr(request, 'session'), "The openid module requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'gaeutils.middle.middleware.SessionMiddleware' in GAE or 'django.contrib.sessions.middleware.SessionMiddleware' in django.",
+    assert hasattr(request, 'session'), "The openid module requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'gaeutils.middle.middleware.SessionMiddleware' in GAE or 'django.contrib.sessions.middleware.SessionMiddleware' in django."
 
     if not _consumer:
         fetchers.setDefaultFetcher(fetcher.UrlfetchFetcher())
