@@ -44,7 +44,7 @@ class DJBOBFragment(models.Model):
     # 
     # Which attribute does this fragment belong to?
     #
-    parent      = models.ForeignKey(DJBOB)
+    bob         = models.ForeignKey(DJBOB)
 
     # 
     # BOB Fragment ID
@@ -59,7 +59,7 @@ class DJBOBFragment(models.Model):
     # 
     # bob_id/bob_fragment are a unique primary key
     #
-    unique_together = ("parent", "fragment")
+    unique_together = ("bob", "fragment")
 
     # 
     # Admin Interface

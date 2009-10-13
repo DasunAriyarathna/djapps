@@ -54,7 +54,7 @@ class ResourceHandler(object):
         return id
 
 @djdecos.format_response
-@djdecos.ensure_user_logged_in("post", "put", "delete")
+@djdecos.ensure_user_logged_in_for_methods("post", "put", "delete")
 def auto_rest_resource_handler(request, resource, action = "", objid = "", handler_class = ResourceHandler, *args):
     format              = djrequest.get_getvar(request,
                                    settings.FORMAT_PARAM,
