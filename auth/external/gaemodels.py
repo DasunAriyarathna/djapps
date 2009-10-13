@@ -4,7 +4,7 @@ import google
 from google import appengine
 from google.appengine.ext import db
 from djapps.gaeutils.sessions import Session
-from djapps.dynamo.gaehelpers import get_or_create_object
+from djapps.dynamo.gaehelpers import get_or_create_object, get_object_id
 
 def get_session(cookie_name, cookies = None):
     return Session(cookie_name = cookie_name)
@@ -110,6 +110,14 @@ class HostSite(db.Model):
     def __str__(self):
         return self.site_name + "/" + str(self.site_url)
 
+    # 
+    # Returns a json representation
+    #
+    def toJson(self):
+        return {'id': get_object_id(self),
+                'site_name': self.site_name,
+                'site_url': self.site_url}
+
 # 
 # The per-site login of a user.  For each request, this object provides
 # authentication attributes for that site.  We can have authentication
@@ -144,6 +152,14 @@ class UserAlias(db.Model):
 
     def __str__(self):
         return self.user_id + "@" + self.host_site.site_name
+
+    # 
+    # Returns a json representation
+    #
+    def toJson(self):
+        return {'id': get_object_id(self),
+                'host_site': get_object_id(self.host_site) if self.host_site else None,
+                'last_login': self.last_login.strftime("%H:%M %d %h %y")}
 
 # 
 # A class that maintains the status of similirities between two user
