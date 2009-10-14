@@ -10,7 +10,7 @@ import  djapps.utils.json           as djjson
 from    djapps.utils                import api_result
 from    djapps.utils                import urls as djurls
 from    djapps.auth                 import REDIRECT_FIELD_NAME
-from    djapps.auth.openid          import PROVIDERS_KEY
+from    djapps.auth.openid          import PROVIDERS_KEY, default_user_maker
 
 from openid import fetchers
 from openid.consumer.consumer import Consumer
@@ -125,7 +125,17 @@ def openid_login_initiate(request,
 # processed (ie when we have directed the user to them in the first place
 # from the above handler).
 #
-def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME):
+# Note that this will do the redirection to the "original" uri that the
+# user had requested (if response was a success) otherwise we redirect back
+# to the login page again!
+#
+# Another thing to note is that we also create a user object here (on
+# success).  But we do not want to tie it down to one kind of user.  So the
+# user will be created with the function user_maker which by default will
+# create a "Default" user, but other types like UserAliases can also be
+# created in this method.
+#
+def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME, user_maker = default_user_maker):
     the_consumer = get_consumer(request)
     if not the_consumer:
         return api_result(-1, "Could not create consumer object")
@@ -147,12 +157,15 @@ def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME):
         print >> sys.stderr, "ServerUrl, Claimed_id: ", response.endpoint.server_url, response.endpoint.claimed_id
         print >> sys.stderr, "================================================================"
 
-        providers[response.endpoint.server_url] = response.endpoint.claimed_id
-        request.openid_session[PROVIDERS_KEY]   = providers
-        # request.openid_session.save()
+        new_user = user_maker(response.endpoint.claimed_id, response.endpoint.server_url)
+        if new_user:
+            providers[response.endpoint.server_url] = response.endpoint.claimed_id
+            request.openid_session[PROVIDERS_KEY]   = providers
 
-        redirect_to = request.REQUEST.get(redirect_field_name, '')
-        return HttpResponseRedirect(redirect_to)
-    else:
-        logging.exception("============================================================")
-        logging.exception("Response Failure: " + str(response))
+            redirect_to = request.REQUEST.get(redirect_field_name, '')
+            return HttpResponseRedirect(redirect_to)
+
+    logging.exception("============================================================")
+    logging.exception("Response Failure: " + str(response))
+    return HttpResponseRedirect(djurls.get_login_url())
+

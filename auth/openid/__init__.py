@@ -5,21 +5,28 @@ from django.conf import settings
 from djapps.dynamo import helpers as dynhelpers
 import base64
 
-def user_from_key(user_id, server_url):
+def default_user_finder(user_id, server_url):
     if settings.USING_APPENGINE:
         from djapps.auth.local.gaemodels import LocalUser
     else:
         from django.contrib.auth.models import User as LocalUser
 
-    user_class = LocalUser
+    username    = user_id # base64.encodestring(user_id).replace("\n", "")
+    user        = dynhelpers.get_first_object(LocalUser, username = username)
+    return user
+
+def default_user_maker(user_id, server_url):
+    if settings.USING_APPENGINE:
+        from djapps.auth.local.gaemodels import LocalUser
+    else:
+        from django.contrib.auth.models import User as LocalUser
 
     username    = user_id # base64.encodestring(user_id).replace("\n", "")
-    user        = dynhelpers.get_first_object(user_class, username = username)
+    user        = dynhelpers.get_first_object(LocalUser, username = username)
     if not user:
-        user = dynhelpers.create_object(user_class, False, None, username = username)
+        user = dynhelpers.create_object(LocalUser, False, None, username = username)
         user.set_unusable_password()
         dynhelpers.save_objects(user)
-
     return user
 
 def user_alias_from_key(user_id, server_url):
@@ -45,7 +52,7 @@ class OpenIDContext(object):
     def is_logged_in(self):
         return PROVIDERS_KEY in self.request.openid_session and len(self.request.openid_session[PROVIDERS_KEY]) > 0
 
-    def get_user(self, provider = None, user_finder = user_from_key):
+    def get_user(self, provider = None, user_finder = default_user_finder):
         """
         Gets the user that is being authenticated by a particular provider.
         If no provider is specified then the user by the first provider
@@ -63,14 +70,20 @@ class OpenIDContext(object):
         which will be responsible for creating/fetching the user object
         given the user ID (and the provider/server url).
         """
+        user = None
         if PROVIDERS_KEY in self.request.openid_session:
             providers = self.request.openid_session[PROVIDERS_KEY]
             if provider:
                 user_id = providers[provider]
             else:
                 user_id = providers.itervalues().next()
-            return user_finder(user_id, provider)
-        return None
+            user = user_finder(user_id, provider)
+            if not user:
+                # remove the provider then
+                del providers[provider]
+                self.request.openid_session[PROVIDERS_KEY] = providers
+
+        return user
     
     def logout_from_provider(self, provider = None):
         """
