@@ -10,6 +10,7 @@ import  djapps.utils.json           as djjson
 from    djapps.utils                import api_result
 from    djapps.utils                import urls as djurls
 from    djapps.auth                 import REDIRECT_FIELD_NAME
+from    djapps.auth.openid          import PROVIDERS_KEY
 
 from openid import fetchers
 from openid.consumer.consumer import Consumer
@@ -132,9 +133,9 @@ def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME):
 
     full_url    = djurls.get_site_url() + request.get_full_path()
     response    = the_consumer.complete(request.GET, full_url)
-    if not hasattr(request.openid_session, 'providers'):
-        request.openid_session['providers'] = {}
-    providers   = request.openid_session['providers']
+    if not hasattr(request.openid_session, PROVIDERS_KEY):
+        request.openid_session[PROVIDERS_KEY] = {}
+    providers   = request.openid_session[PROVIDERS_KEY]
     if response.status == 'success':
         sreg_data = sreg.SRegResponse.fromSuccessResponse(response)
         pape_data = pape.Response.fromSuccessResponse(response)
@@ -143,10 +144,11 @@ def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME):
         print >> sys.stderr, "Response Sucess: sreg, pape: ", sreg_data, pape_data
         if sreg_data:
             print >> sys.stderr, "SReg_Data.items(): ", sreg_data.items()
+        print >> sys.stderr, "ServerUrl, Claimed_id: ", response.endpoint.server_url, response.endpoint.claimed_id
         print >> sys.stderr, "================================================================"
 
         providers[response.endpoint.server_url] = response.endpoint.claimed_id
-        request.openid_session['providers'] = providers
+        request.openid_session[PROVIDERS_KEY]   = providers
         # request.openid_session.save()
 
         redirect_to = request.REQUEST.get(redirect_field_name, '')
