@@ -8,7 +8,8 @@ created by and for the app via a registration process.
 External authentication refers to users who log into the site using an
 external authenticator (eg facebook, myspace, twitter, google, yahoo etc).
 
-There are two ways of doing this.
+There are a few ways of doing this.
+
 1. Have a single middle (msauth) that would maintain a separate
 authenticator for each site regardless of whether it is local or external
 and treat all sites equally.  Each user would now become a user alias which

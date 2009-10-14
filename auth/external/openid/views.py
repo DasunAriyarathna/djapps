@@ -73,12 +73,13 @@ def openid_login_initiate(request,
 
     redirect_to = request.REQUEST.get(redirect_field_name, '')
     parts = list(urlparse.urlparse(request.get_full_path()))
-    print >> sys.stderr, "------------------------------------"
-    print >> sys.stderr, "Parts: ", parts
     parts[2] = 'openid/login/complete'
     parts[4] = 'session_id=%s' % request.session.sid
     parts[5] = ''
     return_to = urlparse.urlunparse(parts)
+    print >> sys.stderr, "------------------------------------"
+    print >> sys.stderr, "Parts: ", parts
+    print >> sys.stderr, "return_to: ", return_to
     realm = urlparse.urlunparse(parts[0:2] + [''] * 4)
 
     redirect_url = auth_request.redirectURL(realm, return_to)
