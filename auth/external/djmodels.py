@@ -7,11 +7,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 import datetime
 
-def get_session(cookie_name, cookies):
-    session_key     = cookies.get(cookie_name, None)
-    engine          = __import__(settings.SESSION_ENGINE, {}, {}, [''])
-    return engine.SessionStore(session_key)
-
 def get_foreignsite_by_url(url):
     return HostSite.objects.get(site_url = url)
 

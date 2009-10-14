@@ -3,11 +3,7 @@ import datetime, settings,sys
 import google
 from google import appengine
 from google.appengine.ext import db
-from djapps.gaeutils.sessions import Session
 from djapps.dynamo.gaehelpers import get_or_create_object, get_object_id
-
-def get_session(cookie_name, cookies = None):
-    return Session(cookie_name = cookie_name)
 
 def get_foreignsite_by_url(url):
     # return HostSite(site_url = url)
