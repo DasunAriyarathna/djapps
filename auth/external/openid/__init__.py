@@ -18,7 +18,7 @@ SESSION_USER_ALIAS_LIST = "_session_useralias_list"
 # 
 # Tries to authenticate a request by facebook and returns a user alias
 #
-class AuthFacebook(Authenticator):
+class AuthOpenID(Authenticator):
     FB_AUTH_TOKEN       = "auth_token"
     FB_SIGNATURE        = "_fb_sig"
     FB_USER_ID          = "_fb_user"
