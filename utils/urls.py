@@ -5,13 +5,17 @@ import settings
 
 def get_site_url():
     """ Gets the name of the site. """
-    if settings:
-        if settings.SITE_URL.startswith("http://"):
+    return getattr(settings, "SITE_URL", "")
+    """
+    if settings and hasattr(settings, "SITE_URL"):
+        re
+        if settings.SITE_URL.startswith("http://") or settings.SITE_URL.startswith("https://"):
             return settings.SITE_URL
         else:
             return "http://" + settings.SITE_URL
     else:
         return ""
+    """
 
 # 
 # Returns a full url based on our site id and url path prefix
