@@ -7,11 +7,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.cache import never_cache
 from djapps.dynamo.helpers import get_or_create_object, get_first_object, save_object, get_object_id
 from djapps.utils import urls as djurls
+from djapps.auth import REDIRECT_FIELD_NAME
 
 from models import *
 import api
-
-REDIRECT_FIELD_NAME = "next"
 
 import  djapps.utils.decorators     as djdecos
 import  djapps.utils.request        as djrequest
