@@ -56,26 +56,33 @@ class OpenIDContext(object):
         self.request = request
 
     def get_providers(self):
-        return self.request.openid_session.providers.keys()
+        if hasattr(self.request.openid_session, "providers"):
+            return self.request.openid_session.providers.keys()
+        else:
+            return []
 
     def get_users(self):
-        providers = self.request.openid_session.providers
-        return [{'op': providers[key], 'id': providers[key]} for key in providers]
+        if hasattr(self.request.openid_session, "providers"):
+            providers = self.request.openid_session.providers
+            return [{'op': providers[key], 'id': providers[key]} for key in providers]
+        else:
+            return []
 
     def is_logged_in(self):
-        return len(a) > 0
+        return hasattr(self.request.openid_session, "providers") and len(self.request.openid_session.providers) > 0
     
     def logout_from_provider(self, provider = None):
         """
         Logout from a specific provider or all providers
         """
-        providers = self.request.openid_session.providers
-        if provider:
-            if provider in providers:
-                del providers[provider]
-                self.request.openid_session.providers = providers
-        else:
-            self.request.openid_session.providers = []
+        if hasattr(self.request.openid_session, "providers"):
+            providers = self.request.openid_session.providers
+            if provider:
+                if provider in providers:
+                    del providers[provider]
+                    self.request.openid_session.providers = providers
+            else:
+                self.request.openid_session.providers = []
 
 class LazyOpenIDContext(object):
     """ A lazy descriptor that will fetch the openid context tied into a

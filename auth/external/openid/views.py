@@ -109,7 +109,7 @@ def openid_login_initiate(request,
         parts[2]    = login_complete_url
 
         parts[4]    = 'session_id=%s' % request.openid_session.sid
-        if redirect_to: parts[4] += '%s=%s' % (redirect_field_name, redirect_to)
+        if redirect_to: parts[4] += '&%s=%s' % (redirect_field_name, redirect_to)
 
         parts[5]    = ''
         return_to   = urlparse.urlunparse(parts)
