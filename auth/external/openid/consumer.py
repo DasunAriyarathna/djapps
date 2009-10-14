@@ -359,6 +359,9 @@ class FinishHandler(Handler):
     if response.status == 'success':
       sreg_data = sreg.SRegResponse.fromSuccessResponse(response).items()
       pape_data = pape.Response.fromSuccessResponse(response)
+
+      print >> sys.stderr, "========================================================"
+      print >> sys.stderr, "SregData: ", sreg_data
       self.session.claimed_id = response.endpoint.claimed_id
       self.session.server_url = response.endpoint.server_url
     elif response.status == 'failure':
