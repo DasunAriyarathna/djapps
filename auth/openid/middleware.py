@@ -3,7 +3,7 @@ import sys, time, logging
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
-from djapps.auth.external import models as authmodels
+from djapps.auth import get_session
 
 # Name of the MS Session Cookie
 OPENID_SESSION_COOKIE_NAME          = 'openid_sessionid'                                    
@@ -56,33 +56,33 @@ class OpenIDContext(object):
         self.request = request
 
     def get_providers(self):
-        if hasattr(self.request.openid_session, "providers"):
-            return self.request.openid_session.providers.keys()
+        if "providers" in self.request.openid_session:
+            return self.request.openid_session["providers"].keys()
         else:
             return []
 
     def get_users(self):
-        if hasattr(self.request.openid_session, "providers"):
-            providers = self.request.openid_session.providers
+        if "providers" in self.request.openid_session:
+            providers = self.request.openid_session["providers"]
             return [{'op': providers[key], 'id': providers[key]} for key in providers]
         else:
             return []
 
     def is_logged_in(self):
-        return hasattr(self.request.openid_session, "providers") and len(self.request.openid_session.providers) > 0
+        return "providers" in self.request.openid_session and len(self.request.openid_session["providers"]) > 0
     
     def logout_from_provider(self, provider = None):
         """
         Logout from a specific provider or all providers
         """
-        if hasattr(self.request.openid_session, "providers"):
-            providers = self.request.openid_session.providers
+        if "providers" in self.request.openid_session:
+            providers = self.request.openid_session["providers"]
             if provider:
                 if provider in providers:
                     del providers[provider]
-                    self.request.openid_session.providers = providers
+                    self.request.openid_session["providers"] = providers
             else:
-                self.request.openid_session.providers = []
+                self.request.openid_session["providers"] = []
 
 class LazyOpenIDContext(object):
     """ A lazy descriptor that will fetch the openid context tied into a
@@ -105,7 +105,7 @@ class OpenIDAuthMiddleware(object):
         # create a new session object ONLY for the openid stuff so we
         # dont have to use the session that is already created!
 
-        request.openid_session              = authmodels.get_session(OPENID_SESSION_COOKIE_NAME, request.COOKIES)
+        request.openid_session              = get_session(OPENID_SESSION_COOKIE_NAME, request.COOKIES)
         request.__class__.openid_context    = LazyOpenIDContext()
 
         # use the old request (though possibly modified)
