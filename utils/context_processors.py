@@ -16,8 +16,6 @@ def gae_local_auth(request):
     # drop in replacement for django auth context_processes 
     # for use with gae
     if hasattr(request, 'local_user'):
-        print >> sys.stderr, "Here..........................................."
-        print >> sys.stderr, "user: ", request.local_user
         user = request.local_user
     else:
         user = None

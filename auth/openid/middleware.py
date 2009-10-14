@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
 from djapps.auth import get_session
+from djapps.auth.openid import OpenIDContext
 
 # Name of the MS Session Cookie
 OPENID_SESSION_COOKIE_NAME          = 'openid_sessionid'                                    
@@ -50,39 +51,6 @@ if not settings.USING_APPENGINE:
     OPENID_SESSION_FILE_PATH        = settings.SESSION_FILE_PATH
     if hasattr(settings, "OPENID_SESSION_FILE_PATH"):
         OPENID_SESSION_FILE_PATH        = settings.OPENID_SESSION_FILE_PATH
-
-class OpenIDContext(object):
-    def __init__(self, request):
-        self.request = request
-
-    def get_providers(self):
-        if "providers" in self.request.openid_session:
-            return self.request.openid_session["providers"].keys()
-        else:
-            return []
-
-    def get_users(self):
-        if "providers" in self.request.openid_session:
-            providers = self.request.openid_session["providers"]
-            return [{'op': providers[key], 'id': providers[key]} for key in providers]
-        else:
-            return []
-
-    def is_logged_in(self):
-        return "providers" in self.request.openid_session and len(self.request.openid_session["providers"]) > 0
-    
-    def logout_from_provider(self, provider = None):
-        """
-        Logout from a specific provider or all providers
-        """
-        if "providers" in self.request.openid_session:
-            providers = self.request.openid_session["providers"]
-            if provider:
-                if provider in providers:
-                    del providers[provider]
-                    self.request.openid_session["providers"] = providers
-            else:
-                self.request.openid_session["providers"] = []
 
 class LazyOpenIDContext(object):
     """ A lazy descriptor that will fetch the openid context tied into a
