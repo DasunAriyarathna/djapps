@@ -55,7 +55,7 @@ class DJCounterShard(db.Model):
 # Big OBject fragment.
 #
 class DJBOBFragment(db.Model):
-    MAX_BOB_SIZE            = 512
+    MAX_BOB_SIZE            = 500
 
     # 
     # Which attribute does this fragment belong to?

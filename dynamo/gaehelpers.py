@@ -203,7 +203,8 @@ def increase_shards(name, num):
 #
 def get_bob_data(bob_name):
     if bob_name:
-        query = GqlQuery("SELECT * from DJBOBFragment where bob_name = :bob_name", bob_name = bob_name)
+        query = dnmod.DJBOBFragment.all()
+        query = query.filter("bob_name = ", bob_name)
         query.order("fragment")
         frags  = query.fetch(query.count())
         return "".join([f.contents for f in frags])
@@ -217,6 +218,10 @@ def get_bob_data(bob_name):
 # parent save it in one go
 #
 def set_bob_data(bob_name, data_str):
+    if type(data_str) is not str:
+        from djapps.utils import json as djjson
+        data_str = djjson.json_encode(data_str)
+        
     # 
     # delete previous fragments.
     # This is unnecessary really since we can "override" fragments instead
