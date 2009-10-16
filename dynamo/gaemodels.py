@@ -52,22 +52,6 @@ class DJCounterShard(db.Model):
     count       = db.IntegerProperty(default = 0)
 
 # 
-# A generic big object ID.
-#
-# BOBs are Big OBjects.  Essentially they are used to store large items for
-# the attribute of an object.  The bob_id/bob_fragment is a unique primary
-# key.
-#
-# We could use blobs but problem is GAE only gives us 1000 blobs in total
-# so we have to manage the fragmentation manually!!  Damn it.
-#
-class DJBOB(db.Model):
-    # 
-    # Number of fragments in this bob
-    #
-    num_fragments   = db.IntegerProperty(default = 0)
-
-# 
 # Big OBject fragment.
 #
 class DJBOBFragment(db.Model):
@@ -76,7 +60,7 @@ class DJBOBFragment(db.Model):
     # 
     # Which attribute does this fragment belong to?
     #
-    bob         = db.ReferenceProperty(DJBOB)
+    bob_name    = db.StringProperty()
 
     # 
     # BOB Fragment ID
