@@ -195,99 +195,16 @@ def increase_shards(name, num):
     db.run_in_transaction(txn)
 
 #################################################################################
-#                           All bob-related helper methods                      #
+#                       GAE specific stuff to create/change bobs                #
 #################################################################################
-
-# 
-# Set template's data
-#
-def set_object_bob_data(obj, data):
-    # do not use Blobs as we have a limit of 1000 blobs and files!!!
-    # so use custom bob's - reads are cheap anyway and doing partial reads
-    # are cheap anyway
-    # obj.bob = db.Blob(data)
-    if not obj.bob:
-        obj.bob = _new_bob()
-    saved_objects = _set_bob_data(obj.bob, data)
-    save_objects(obj, obj.bob, *saved_objects)
-
-# 
-# Gets the value of a "bob" property of any object
-#
-def get_object_bob_data(obj):
-    # again not using blobs thanks to the 1000 blob limit
-    # return obj.bob
-    return _get_bob_data(obj.bob)
-
-#################################################################################
-#               All extendible attribute-related helper methods                 #
-#################################################################################
-
-# 
-# Set the value of an object's attribute
-#
-def set_attr(obj, attrib_name, value):
-    class_name = "%s.%s" % (obj.__module__, obj.__class__.__name__)
-    attrib = _get_or_create_attribute(class_name, get_object_id(obj), attrib_name)
-
-    if type(value) == bool or type(value) == int or type(value) == float:
-        attrib.value = str(value)
-        if type(value) == bool:
-            attrib.attrib_type = dnmod.DJAttribute.ATTRIB_TYPE_BOOL
-        elif type(value) == int:
-            attrib.attrib_type = dnmod.DJAttribute.ATTRIB_TYPE_INT
-        else:
-            attrib.attrib_type = dnmod.DJAttribute.ATTRIB_TYPE_FLOAT
-    else:
-        # attrib.bob          = Blob(value)
-        attrib.attrib_type   = dnmod.DJAttribute.ATTRIB_TYPE_BOB
-        set_object_bob_data(attrib, value)
-    db.put(attrib)
-
-# 
-# Gets the object attributes
-#
-def get_attr(obj, attrib_name, default_val = None):
-    class_name = "%s.%s" % (obj.__module__, obj.__class__.__name__)
-    attrib = dnmod.DJAttribute.objects.get(obj_class = class_name, obj_id = obj.id, attrib_name = attrib_name)
-    if attrib:
-        if attrib.attrib_type == dnmod.DJAttribute.ATTRIB_TYPE_BOOL:
-            return bool(attrib.value)
-        elif attrib.attrib_type == dnmod.DJAttribute.ATTRIB_TYPE_INT:
-            return int(attrib.value)
-        elif attrib.attrib_type == dnmod.DJAttribute.ATTRIB_TYPE_FLOAT:
-            return float(attrib.value)
-        else:
-            return _get_bob_data(attrib.bob)
-    else:
-        logging.debug("========== Attribute %s does not exist" % attrib_name)
-
-    return default_val
-
-# 
-# Create a new "dynamic" object instance
-#
-def _get_or_create_attribute(obj_class, obj_id, attrib_name):
-    return dnmod.DJAttribute.get_or_insert(obj_class = obj_class,
-                                          obj_id = obj_id,
-                                          attrib_name = attrib_name)
-
-#################################################################################
-#               Private GAE specific stuff to create/change bobs                #
-#################################################################################
-
-# 
-# Creates a new BOB
-#
-def _new_bob():
-    return dnmod.DJBOB(num_fragments = 0)
 
 # 
 # gets the data within all the bob fragments of a bob
 #
-def _get_bob_data(bob):
-    if bob:
-        query = GqlQuery("SELECT * from DJBOBFragment where bob = :bob", bob = bob)
+def get_bob_data(bob_name):
+    if bob_name:
+        query = dnmod.DJBOBFragment.all()
+        query = query.filter("bob_name = ", bob_name)
         query.order("fragment")
         frags  = query.fetch(query.count())
         return "".join([f.contents for f in frags])
@@ -300,13 +217,17 @@ def _get_bob_data(bob):
 # Returns all the fragments so we dont save it here and let the 
 # parent save it in one go
 #
-def _set_bob_data(bob, data_str):
+def set_bob_data(bob_name, data_str):
+    if type(data_str) is not str:
+        from djapps.utils import json as djjson
+        data_str = djjson.json_encode(data_str)
+        
     # 
     # delete previous fragments.
     # This is unnecessary really since we can "override" fragments instead
     # of deleting and recreating
     #
-    delete_all_objects(dnmod.DJBOBFragment, bob = bob)
+    delete_all_objects(dnmod.DJBOBFragment, bob_name = bob_name)
 
     # 
     # recreate fragments
@@ -320,7 +241,7 @@ def _set_bob_data(bob, data_str):
     output      = []
 
     while part1 != "":
-        fragment = dnmod.DJBOBFragment(bob = bob, fragment = fragindex, contents = part1)
+        fragment = dnmod.DJBOBFragment(bob_name = bob_name, fragment = fragindex, contents = part1)
         output.append(fragment)
 
         str_val = str_val[dnmod.DJBOBFragment.MAX_BOB_SIZE : ]
@@ -328,6 +249,5 @@ def _set_bob_data(bob, data_str):
 
         fragindex += 1
 
-    bob.num_fragments = fragindex
     return output
 
