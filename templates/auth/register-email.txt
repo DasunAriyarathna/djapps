@@ -1,0 +1,9 @@
+Hello {{profile.first_name}} {{profile.last_name}},
+
+Thank you very much for signing up for your account!
+
+To activate your account, please click the link below within
+{{register_timeout}} days:
+
+http://{{site_domain}}/{{confirm_uri}}/{{reg_info.activation_key}}
+
