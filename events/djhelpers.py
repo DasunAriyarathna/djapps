@@ -4,8 +4,6 @@ from django.db.models import Q
 import djapps.events.djmodels as evmod
 import djapps.dynamo.djmodels as dnmod
 import djmodels as evtmod
-from djapps.dynamo.helpers import create_object, get_object_by_id, get_objects, save_object
-from djapps.dynamo.helpers import set_object_bob_data, get_all_objects
 
 
 #################################################################################
