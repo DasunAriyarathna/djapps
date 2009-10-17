@@ -83,7 +83,7 @@ def account_register(request,
     if not email:
         return api_result(-1, "Email is mandatory")
 
-    if not password:
+    if not password1:
         return api_result(-1, "Please enter a valid password")
 
     if password1 != password2:
@@ -110,8 +110,7 @@ def account_register(request,
         if format == "json":
             return api_result(0, "User created.  Confirmation email sent.")
         else:
-            return render_to_response(pnst_template, {'context': form_context},
-                                       context_instance = RequestContext(request))
+            return HttpResponseRedirect(djurls.get_login_url())
     else:
         if format == "json":
             return api_result(-1, "User already exists.  Please enter a new email address.")
