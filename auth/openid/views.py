@@ -9,13 +9,14 @@ import  djapps.utils.request        as djrequest
 import  djapps.utils.json           as djjson
 from    djapps.utils                import api_result
 from    djapps.utils                import urls as djurls
+from    djapps.dynamo               import helpers as dynhelpers
 from    djapps.auth                 import REDIRECT_FIELD_NAME
 from    djapps.auth.openid          import PROVIDERS_KEY, default_user_maker
 
 from openid import fetchers
 from openid.consumer.consumer import Consumer
 from openid.consumer import discover
-from openid.extensions import pape, sreg
+from openid.extensions import pape, sreg, ax
 
 if settings.USING_APPENGINE:
     import gaefetcher as fetcher
@@ -94,6 +95,15 @@ def openid_login_initiate(request,
         # request.openid_session.server_url = auth_request.endpoint.server_url
         # request.openid_session.save()
 
+        # this is messy - we need the extension type to be specified
+        # elsewhere instead of having to hardcode it all here
+        fetch_request = ax.FetchRequest()
+        fetch_request.add(ax.AttrInfo("http://schema.openid.net/contact/email", 1, True, "email"))
+        fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/first", 1, True, "firstname"))
+        fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/last", 1, True, "lastname"))
+        auth_request.addExtension(fetch_request)
+
+
         sreg_request = sreg.SRegRequest(optional=['nickname', 'fullname', 'email'])
         auth_request.addExtension(sreg_request)
 
@@ -149,6 +159,7 @@ def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME, us
     if response.status == 'success':
         sreg_data = sreg.SRegResponse.fromSuccessResponse(response)
         pape_data = pape.Response.fromSuccessResponse(response)
+        fetch_data = ax.FetchResponse.fromSuccessResponse(response)
 
         print >> sys.stderr, "================================================================"
         print >> sys.stderr, "Response Sucess: sreg, pape: ", sreg_data, pape_data
@@ -157,10 +168,22 @@ def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME, us
         print >> sys.stderr, "ServerUrl, Claimed_id: ", response.endpoint.server_url, response.endpoint.claimed_id
         print >> sys.stderr, "================================================================"
 
-        new_user = user_maker(response.endpoint.claimed_id, response.endpoint.server_url)
+        new_user, new_created = user_maker(response.endpoint.claimed_id, response.endpoint.server_url)
         if new_user:
             providers[response.endpoint.server_url] = response.endpoint.claimed_id
             request.openid_session[PROVIDERS_KEY]   = providers
+
+            # update user info if not already done
+            first_name = fetch_data.data.get("http://axschema.org/namePerson/first", None)
+            last_name = fetch_data.data.get("http://axschema.org/namePerson/last", None)
+            email = fetch_data.data.get("http://schema.openid.net/contact/email", None)
+            if first_name:
+                new_user.first_name = first_name[0]
+            if last_name:
+                new_user.last_name  = last_name[0]
+            if email:
+                new_user.email      = email[0]
+            dynhelpers.save_objects(new_user)
 
             redirect_to = request.REQUEST.get(redirect_field_name, '')
             return HttpResponseRedirect(redirect_to)
