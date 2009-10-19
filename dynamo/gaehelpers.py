@@ -1,5 +1,5 @@
 
-import datetime, settings, logging
+import datetime, settings, logging, sys
 from google.appengine.ext import db
 from google.appengine.api.users import User
 from djapps.gaeutils.sessions import Session
@@ -100,7 +100,7 @@ def delete_all_objects(obj_class, num_del = 300, **filters):
             return
         else:
             if num_del > num_objs: num_del = num_objs
-            print "Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class))
+            print >> sys.stderr, "Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class))
             count = 0
             while count < 5:
                 try:

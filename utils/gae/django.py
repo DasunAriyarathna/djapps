@@ -3,9 +3,7 @@ import logging, os, sys
 def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip"):
     # remove the standard version of django - django 0.96
     for k in [ k for k in sys.modules if k.lower().startswith('django') ]:
-        logging.debug(" ========== ")
         logging.debug(" ========== Deleting Module: " + k + ", " + str(sys.modules[k]))
-        logging.debug(" ========== ")
         del sys.modules[k]
 
     # force sys.path to have our own directory first in 
