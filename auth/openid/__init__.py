@@ -23,11 +23,13 @@ def default_user_maker(user_id, server_url):
 
     username    = user_id # base64.encodestring(user_id).replace("\n", "")
     user        = dynhelpers.get_first_object(LocalUser, username = username)
+    new_created = False
     if not user:
+        new_created = True
         user = dynhelpers.create_object(LocalUser, False, None, username = username)
         user.set_unusable_password()
         dynhelpers.save_objects(user)
-    return user
+    return user, new_created
 
 def user_alias_from_key(user_id, server_url):
     pass
