@@ -30,7 +30,7 @@ function jqueryAjax(req_url, success_callback,
                     req_type,       /* = "GET" */
                     req_data,       /* = null */
                     error_callback, /* = ajaxErrorHandler */
-                    req_timeout     /* = 10000 */)
+                    req_timeout     /* = 30000 */)
 {
     if (typeof req_type === "undefined" || req_type == null)
         req_type = "GET";
@@ -39,7 +39,7 @@ function jqueryAjax(req_url, success_callback,
         req_data = null;
 
     if (typeof req_timeout === "undefined" || req_timeout == null)
-        req_timeout = 10000;
+        req_timeout = 30000;
 
     if (typeof error_callback === "undefined" || error_callback == null)
         error_callback = ajaxErrorHandler;
