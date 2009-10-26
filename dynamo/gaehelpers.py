@@ -135,11 +135,17 @@ def get_object_count(obj_class, **kwds):
 
     return query.count()
 
-# 
-# Returns the ID of a db object
-#
 def get_object_id(obj):
+    """
+    Returns the ID of a db object
+    """
     return obj.key().id_or_name()
+
+def are_keys_equal(obj1, obj2):
+    """
+    Tells if keys of two objects are equal
+    """
+    return get_object_id(obj1) == get_object_id(obj2)
 
 #################################################################################
 #                           Counter related helper methods                      #
