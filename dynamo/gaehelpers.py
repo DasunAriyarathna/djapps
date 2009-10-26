@@ -49,6 +49,11 @@ def get_object_by_id(obj_class, key):
     except ValueError, v:
         return obj_class.get_by_key_name(key)
 
+# TODO: memcaching!
+def get_object_by_key(obj_class, key):
+    """ Get an object by its key name. """
+    return obj_class.get_by_key_name(key)
+
 def create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
     obj = obj_class(parent, id_val, **kwds)
     if save: db.put(obj)
@@ -141,18 +146,18 @@ def get_object_id(obj):
 #################################################################################
 def get_counter(name):
     from google.appengine.api import memcache
-    # total = memcache.get(name)
+    total = memcache.get(name)
     if total is None:
         total = 0
         for counter in dnmod.DJCounterShard.gql('WHERE name = :1', name):
             total += counter.count
-        # memcache.add(name, str(total), 60)
-    return total
+        memcache.add(name, str(total), 60)
+    return int(total)
 
 def delete_counter(name):
     """ Deletes the counters of a given type. """
     from google.appengine.api import memcache
-    # memcache.delete(name)
+    memcache.delete(name)
     shards = dnmod.DJCounterShard.gql('WHERE name = :1', name)
     count = 0
     while count < 3:
@@ -177,13 +182,11 @@ def increment_counter(name, incr = 1):
             counter = dnmod.DJCounterShard(key_name = shard_name, name = name)
         counter.count += incr
         counter.put()
-        return counter.count
-    new_count = db.run_in_transaction(txn)
+    db.run_in_transaction(txn)
+    new_count = get_counter(name)
     from google.appengine.api import memcache
-    #
-    # if memcache.get(name) is None: memcache.set(name, incr)
-    # else: memcache.incr(name, incr)
-    #
+    if memcache.get(name) is None: memcache.set(name, incr)
+    else: memcache.incr(name, incr)
     return new_count
 
 def increase_shards(name, num):

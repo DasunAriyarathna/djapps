@@ -60,3 +60,12 @@ def resturl(regex, handler, suffix,
     kwargs['handler_class']     = handler
     kwargs['handler_suffix']    = suffix
     return url(regex, handler_function, kwargs, name, prefix)
+
+class DefaultRestHandler(object):
+    """
+    An OO style accessor for the resturl
+    """
+    @classmethod
+    def RestUrl(cls, regex, suffix, kwargs = None, name = None, prefix=''):
+        return resturl(regex, cls, suffix, kwargs, name, prefix, handler_function = manual_resource_handler)
+
