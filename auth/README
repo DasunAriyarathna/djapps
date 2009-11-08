@@ -1,0 +1,46 @@
+Djapps Authentication
+---------------------
+
+Djapps authentication is developed to enable external AND local
+authenticaiton in an app.  Local authentication refers to models and users
+created by and for the app via a registration process.
+
+External authentication refers to users who log into the site using an
+external authenticator (eg facebook, myspace, twitter, google, yahoo etc).
+
+There are a few ways of doing this.
+
+1. Have a single middle (msauth) that would maintain a separate
+authenticator for each site regardless of whether it is local or external
+and treat all sites equally.  Each user would now become a user alias which
+hold a user id as well as a site id ( to identify the site the user belongs
+to - "local" for local site).  The advantage is that a single middlware can
+take care of it all and by specifying authenticators and their properties
+is also very easy from a single location.
+
+
+2. Have multiple middle ware - one for each site.  Each site has its own
+middleware and the local site is no exception.  Advantage of this is that a
+"unifying" layer is not required and each the user type (ie its host site)
+is apparant from the variable.  However there would be a fair bit of code
+duplication (perhaps?).  With authentication we could employ certain
+conventions that may apply to all authenticators which we cannot do in this
+manner.  Also to have a unifying layer will have to have an extra
+middleware that will defeat the purpose of having separate middlewares
+anyway.
+
+3. Have a unifying middle ware (msauth) for external auth but leave the
+local auth out of it.  So local auth is handled by itself.  Why go through
+this whole rigmorale if local auth can be done properly by default anyway?
+ie we already have a auth (and registration) process for local
+authentication as its own middleware so leave it there
+
+3rd way seems the way to go.  Disabling localauth is easy and can be done
+by simply dropping the localauth middle ware and this should not impact
+external auth anyway.  And vice versa.  We should be able to drop external
+auth completely and leave local auth as is.  The problem however is that
+upper level layers have to be aware of both schemes.  This is good however
+since apps that dont use external aps or dont know about it can use the
+request.user in a normal fashion.  Or we could mandate an alias called
+local_user for request.user (in GAE this would point to our local user) and
+ext_user or useraliases for all other external ones.
