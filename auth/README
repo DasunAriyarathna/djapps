@@ -10,7 +10,7 @@ external authenticator (eg facebook, myspace, twitter, google, yahoo etc).
 
 There are a few ways of doing this.
 
-1. Have a single middle (msauth) that would maintain a separate
+1. Have a single middleware (msauth) that would maintain a separate
 authenticator for each site regardless of whether it is local or external
 and treat all sites equally.  Each user would now become a user alias which
 hold a user id as well as a site id ( to identify the site the user belongs
@@ -44,3 +44,64 @@ since apps that dont use external aps or dont know about it can use the
 request.user in a normal fashion.  Or we could mandate an alias called
 local_user for request.user (in GAE this would point to our local user) and
 ext_user or useraliases for all other external ones.
+
+---------------------------------------------------------------------------------
+
+By going the path of (3) we are introducing a new User model/class - the
+UserAlias.  The user alias explicitly holds the authenticator site and the
+user id (on that site).  This is only required because the foreign site has
+to be captured somehow and the User class in django.contrib.auth does not
+provide that.  In fact UserAlias has a last_login field that is again a
+duplicate of what the variable in django's User class.
+
+So this brings to how can we unify the two so that things dont need to be
+rewritten in order to accomodate UserAliases and at the same time we can
+capture foreign site information into the existing user class.
+
+One way around this would be via a naming convention that user names are
+suffixed with a "#<site_name>" to indicate that the user is actually from
+an external site (and also by setting the password as unsettable).  So this
+way all usernames that do not have the "#<site_name>" are local users
+whereas usernames with a "#<site_name>" belong to a particular site and
+they can even be routed to be handled by the authenticator of that specific
+site (eg facebook or google etc).  The only caveat here is that this marker
+character (ie "#") must NOT be allowed in the django user class and it must
+be upto the app to enforce this.  Consider this:
+
+A user has the facebook ID of 652482914.  So this user can represented in
+the django auth system using the username 652482914#facebook.  However this
+user in the DB is ONLY created when the facebook connect authentication
+succeeds (and with an unsettable password).  A user cannot log into this
+account via the account login page because the password will never match.
+
+Now another registers on the local site registration page with the exact
+same username as above (ie with the "#" and all and even provides a
+password).  Now if the user registers AFTER the creation of the above
+facebook account, he/she will get a "user exists" error.  However if the
+user does a sneaky and registers this first, then what is the impact of a
+successful registration?  So when the fb connect happens, it can either
+override the user in which case the user who registered this account will
+loose all his stuff or it can decline the creation of the user account.
+The former is a better situation since it will prevent users from creating
+accounts with the "#" character in the username.
+
+Second issue is a 30 character limit on the django auth usernames.  So if
+assume 255 differnt foreign sites - then we can sacrifice 3 bytes in the
+username (ie "#" + hexadecimal version of the site ID) for the site name.
+Is this a big deal?
+
+To avoid these issues we could patch the user class in django to one or
+more of:
+1. Increase username sizes to 64 characters
+2. Make emails unique as well as usernames
+3. Add a foreign_site field which is either a string or an integer and make
+a unique_together on username/foreign_site.  This would have a default
+value of 0 to indicate user is authenticated by the local site.
+
+As a side matter the seperator (if not adding another field to the User
+class) does NOT have to be the "#" character.  It can be any character that
+the app wants to prevent in a user name eg space, "/" or "#" or "&" or "$"
+etc.  The "@" symbol most probably WONT be it since an email could be a
+perfectly valid username.  Either this or we can completely reject email
+addresses as usernames since there is already a field for email addresses
+in the Auth class.
