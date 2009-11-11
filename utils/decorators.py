@@ -1,9 +1,10 @@
 
+import sys
+
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 
 from . import api_result
-from . import FormatHttpResponse
 import json as djjson
 
 def format_response(func):
@@ -77,7 +78,7 @@ def send_unauthenticated_response(request, *args, **kwds):
                                   settings.FORMAT_PARAM,
                                   djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
     if format == "json":
-        return FormatHttpResponse(api_result(-1, "Unable to authenticate user."), "json")
+        return HttpResponse(djjson.json_encode(api_result(-1, "Unable to authenticate user.")), content_type = "application/json")
     else:
         return HttpResponseRedirect(djurls.get_login_url(request.path))
     
@@ -95,6 +96,19 @@ def ensure_user_authenticated(auth_function):
         return ensure_user_authenticated_method
     return ensure_user_authenticated_decorator
                 
+# 
+# Same as the ensure_user_authenticated but applies to a class or
+# instance method instead of a global method.
+#
+def ensure_user_authenticated_im(auth_function):
+    def ensure_user_authenticated_decorator(func):
+        def ensure_user_authenticated_method(scope, request, *args, **kwds):
+            if auth_function and not auth_function(scope, request, *args, **kwds):
+                return send_unauthenticated_response(scope, request, *args, **kwds)
+            else:
+                return func(scope, request, *args, **kws)
+        return ensure_user_authenticated_method
+    return ensure_user_authenticated_decorator
 
 # 
 # A decorator for ensuring the user is logged in for given methods.  Eg we
