@@ -69,23 +69,8 @@ class LazyUserAliases(object):
 #
 class MultiSiteAuthMiddleware(object):
     def __init__(self):
-        self.authenticators = []
-
-        from django.conf import settings
-        from django.core import exceptions
-
-        for full_auth_class in settings.SITE_AUTHENTICATORS:
-            params          = settings.SITE_AUTHENTICATORS[full_auth_class]
-            auth_class      = djapps.auth.external.load_authenticator_class(full_auth_class)    
-
-            auth_instance   = auth_class(**params)
-
-            auth_instance.host_site  = get_first_object(djmodels.HostSite, site_name = params['host_site'].lower())
-
-            if auth_instance.host_site is None:
-                assert "Authenticator Host Site is invalid!!!"
-
-            self.authenticators.append(auth_instance)
+        import utils
+        self.authenticators = utils.load_site_authenticators()
 
     def process_request(self, request):
         # create a new session object ONLY for the multi site stuff so we
