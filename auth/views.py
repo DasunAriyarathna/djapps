@@ -1,5 +1,7 @@
 
 import  djapps.utils.decorators     as djdecos
+import  djapps.utils.request        as djrequest
+from django.http import HttpResponseRedirect, HttpResponse
 
 @djdecos.format_response
 def complete_logout(request):
