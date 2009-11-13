@@ -7,90 +7,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 import datetime
 
-def get_foreignsite_by_url(url):
-    return HostSite.objects.get(site_url = url)
-
-def get_user_profile_model():
-    """ Get the user profile class from the settings. 
-    Otherwise use the LocalSiteProfile as the default. """
-    try:
-        app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
-        return models.get_model(app_label, model_name)
-    except (AttributeError, ImportError, ImproperlyConfigured):
-        return LocalSiteProfile
-
 def get_or_create_useralias(user_id, host_site):
     ualias, newcreated = UserAlias.objects.get_or_create(user_id = user_id, host_site = host_site)
     return ualias
-
-class LocalSiteProfile(models.Model):
-    """
-    Default Profile maintained for a user on the local site.
-    """
-    NOT_REGISTERED          = 0
-    AWAITING_CONFIRMATION   = 1
-    REGISTERED              = 2
-
-    # 
-    # First name of the user
-    #
-    first_name          = models.CharField(max_length = 128, default = "")
-
-    # 
-    # last name of the user
-    #
-    last_name           = models.CharField(max_length = 128, default = "")
-
-    # 
-    # nick name of the user
-    #
-    nick_name           = models.CharField(max_length = 128, default = "")
-
-    # 
-    # user email address
-    #
-    email               = models.EmailField(_('e-mail address'), blank=True)
-
-    # 
-    # Account type
-    #
-    # 0 = Free
-    #
-    # everythign else we will decide later
-    #
-    accounttype         = models.IntegerField(default = 0)
-
-    # 
-    # User's web/blog uri
-    #
-    uri             = models.URLField(blank = True)
-
-    # 
-    # General profile text/sayings
-    #
-    text            = models.CharField(max_length = 256, default = "No Comment")
-
-    # 
-    # URL to an image
-    #
-    image           = models.URLField(blank = True)
-
-    # 
-    # Registration status
-    # 0 - Not Registered
-    # 1 - Waiting for confirmation of registration
-    # 2 - Registered
-    #
-    reg_status      = models.IntegerField(default = REGISTERED)
-
-    class Meta:
-        verbose_name_plural = "Local Site Profiles"
-
-    # 
-    # Admin Interface
-    #
-    class Admin:
-        save_on_top = True
 
 # 
 # The site which is authenticating the user.
@@ -239,6 +158,5 @@ class AliasLinkage(models.Model):
 
 djangoadmin.site.register(UserAlias)
 djangoadmin.site.register(HostSite)
-djangoadmin.site.register(LocalSiteProfile)
 djangoadmin.site.register(AliasLinkage)
 

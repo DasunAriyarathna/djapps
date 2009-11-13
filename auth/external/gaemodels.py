@@ -5,10 +5,6 @@ from google import appengine
 from google.appengine.ext import db
 from djapps.dynamo.gaehelpers import get_or_create_object, get_object_id
 
-def get_foreignsite_by_url(url):
-    # return HostSite(site_url = url)
-    return None
-
 def get_or_create_useralias(user_id, host_site):
     aliases = UserAlias.all();
     aliases.filter("user_id = ", user_id)
@@ -19,66 +15,6 @@ def get_or_create_useralias(user_id, host_site):
         alias = UserAlias(user_id = user_id, host_site = host_site)
         alias.put()
         return alias
-
-class LocalSiteProfile(db.Model):
-    """
-    Default Profile maintained for a user on the local site.
-    """
-    NOT_REGISTERED          = 0
-    AWAITING_CONFIRMATION   = 1
-    REGISTERED              = 2
-
-    # 
-    # First name of the user
-    #
-    first_name          = db.StringProperty(default = "")
-
-    # 
-    # last name of the user
-    #
-    last_name           = db.StringProperty(default = "")
-
-    # 
-    # nick name of the user
-    #
-    nick_name           = db.StringProperty(default = "")
-
-    # 
-    # user email address
-    #
-    email               = db.EmailProperty(default = "")
-
-    # 
-    # Account type
-    #
-    # 0 = Free
-    #
-    # everythign else we will decide later
-    #
-    accounttype         = db.IntegerProperty(default = 0)
-
-    # 
-    # User's web/blog uri
-    #
-    uri             = db.LinkProperty(default = "")
-
-    # 
-    # General profile text/sayings
-    #
-    text            = db.StringProperty(default = "No Comment")
-
-    # 
-    # URL to an image
-    #
-    image           = db.LinkProperty(default = "")
-
-    # 
-    # Registration status
-    # 0 - Not Registered
-    # 1 - Waiting for confirmation of registration
-    # 2 - Registered
-    #
-    reg_status      = db.IntegerProperty(default = REGISTERED)
 
 # 
 # The site which is authenticating the user.
