@@ -94,8 +94,8 @@ function delete_cookie(cookie_name)
 {
     var cookie_date = new Date();
     cookie_date.setTime(cookie_date.getTime() - 1);
-    document.cookie = (cookie_name + "=; expires=Thu, 01-Jan-1970 00:00:01 GMT");
-    get_cookie(cookie_name);
+    document.cookie = (cookie_name + "=;expires=Thu, 01-Jan-1970 00:00:01 GMT");
+    // get_cookie(cookie_name);
 }
 
 function get_cookie(cookie_name)
