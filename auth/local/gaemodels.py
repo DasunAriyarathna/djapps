@@ -43,7 +43,8 @@ def check_password(raw_password, enc_password):
     return hsh == get_hexdigest(algo, salt, raw_password)
 
 # 
-# A user in the model - not like the User object
+# A user in the model - not like Appengine'e User object.
+# This is a copy of DJANGO's User model
 #
 class LocalUser(db.Model):
     """Users within the Django authentication system are represented by this model.

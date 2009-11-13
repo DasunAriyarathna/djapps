@@ -74,7 +74,6 @@ class MultiSiteAuthMiddleware(object):
         from django.conf import settings
         from django.core import exceptions
 
-        # TODO: Add more authentication middlewares here!
         for full_auth_class in settings.SITE_AUTHENTICATORS:
             params          = settings.SITE_AUTHENTICATORS[full_auth_class]
             auth_class      = djapps.auth.external.load_authenticator_class(full_auth_class)    

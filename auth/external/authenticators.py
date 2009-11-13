@@ -25,7 +25,14 @@ class Authenticator(object):
         also a object for the host site!!!"""
         return None
 
-    def processResponse(self, request, response): pass
+    def authenticate_credentials(self, **credentials):
+        """ Authenticates a request and if successful, returns a descriptor
+        object that lazily loads the UserAlias object when actually used and
+        also a object for the host site!!!"""
+        return None
+
+    def processResponse(self, request, response):
+        pass
 
     def logout(self, request):
         """ Called to cleanup any cookies we may have created. """
