@@ -7,28 +7,6 @@ import models, sys
 SESSION_USER_ALIAS_LIST = "_session_useralias_list"
 BACKEND_SESSION_KEY     = "_session_user_backend"
 
-def load_authenticator_class(full_auth_class):
-    try:
-        dot = full_auth_class.rindex('.')
-    except ValueError:
-        raise exceptions.ImproperlyConfigured, '%s isn\'t a authenticator module' % full_auth_class
-
-    auth_module, auth_classname = full_auth_class[:dot], full_auth_class[dot+1:]
-
-    try:
-        auth_mod = __import__(auth_module, {}, {}, [''])
-    except ImportError, e:
-        raise exceptions.ImproperlyConfigured, 'Error importing site authenticator %s: "%s"' % (auth_module, e)
-
-    try:
-        auth_class = getattr(auth_mod, auth_classname)
-    except AttributeError:
-        raise exceptions.ImproperlyConfigured,                              \
-                'Authenticator module "%s" does not define a "%s" class' %  \
-                    (auth_module, auth_classname)
-
-    return auth_class
-
 # 
 # Logout a user completely...
 #

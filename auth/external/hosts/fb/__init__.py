@@ -64,7 +64,6 @@ class AuthFacebook(Authenticator):
         return hasher.hexdigest()
 
     def authenticate(self, request):
-
         request.set_fb_cookies      = None
         request.delete_fb_session   = False
 
@@ -198,6 +197,8 @@ class AuthFacebook(Authenticator):
 
     def processResponse(self, request, response):
         """ Deletes FB cookies if marked for deletion. """
+        print "MsSession: ", request.ms_session, request.ms_session[SESSION_USER_ALIAS_LIST]
+        None.a = 3
         if (hasattr(request, 'ms_session') and SESSION_USER_ALIAS_LIST not in request.ms_session) or \
            (hasattr(request, 'delete_fb_session') and request.delete_fb_session):
             response.delete_cookie(self.api_key + '_user')
