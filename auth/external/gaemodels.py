@@ -90,6 +90,7 @@ class UserAlias(db.Model):
     #
     def toJson(self):
         return {'id': get_object_id(self),
+                'user_id': self.user_id,
                 'host_site': get_object_id(self.host_site) if self.host_site else None,
                 'last_login': self.last_login.strftime("%H:%M %d %h %y")}
 

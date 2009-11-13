@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 import datetime
+from djapps.dynamo.djhelpers import get_or_create_object, get_object_id
 
 UNUSABLE_PASSWORD = '!' # This will never be a valid hash
 
@@ -53,6 +54,14 @@ class HostSite(models.Model):
     #
     class Admin:
         save_on_top = True
+
+    # 
+    # Returns a json representation
+    #
+    def toJson(self):
+        return {'id': get_object_id(self),
+                'site_name': self.site_name,
+                'site_url': self.site_url}
 
 # 
 # The per-site login of a user.  For each request, this object provides
@@ -107,6 +116,15 @@ class UserAlias(models.Model):
     #
     class Admin:
         save_on_top = True
+
+    # 
+    # Returns a json representation
+    #
+    def toJson(self):
+        return {'id': get_object_id(self),
+                'user_id': self.user_id,
+                'host_site': get_object_id(self.host_site) if self.host_site else None,
+                'last_login': self.last_login.strftime("%H:%M %d %h %y")}
 
 class ExternalUserManager(models.Manager):
     def create_user(self, username, ext_site, password=None):
