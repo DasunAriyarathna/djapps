@@ -83,6 +83,7 @@ class AuthFacebook(Authenticator):
 
             # try fb connect
             fb_user = self.authenticate_fb_connect(request)
+
             if not fb_user:
                 if self.FB_USER_ID in request.ms_session:
                     fb_user = request.ms_session[self.FB_USER_ID]
@@ -197,8 +198,6 @@ class AuthFacebook(Authenticator):
 
     def processResponse(self, request, response):
         """ Deletes FB cookies if marked for deletion. """
-        print "MsSession: ", request.ms_session, request.ms_session[SESSION_USER_ALIAS_LIST]
-        None.a = 3
         if (hasattr(request, 'ms_session') and SESSION_USER_ALIAS_LIST not in request.ms_session) or \
            (hasattr(request, 'delete_fb_session') and request.delete_fb_session):
             response.delete_cookie(self.api_key + '_user')
@@ -211,7 +210,7 @@ class AuthFacebook(Authenticator):
             for key in request.set_fb_cookies.keys():
                 cookie_key = str(key)
                 cookie_val = str(request.set_fb_cookies[key])
-                print >> sys.stderr, "Setting FB Cookies: ", cookie_key, cookie_val
+                print >> sys.stderr, "============Setting FB Cookies: ", cookie_key, cookie_val
                 response.set_cookie(cookie_key, cookie_val)
 
         # request.ms_session[self.FB_SESSION_DELETE] = False
