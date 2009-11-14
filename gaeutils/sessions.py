@@ -144,7 +144,7 @@ class Session(object):
     data.
     """
 
-    COOKIE_NAME = 'appengine-utilities-session-sid' # session token
+    COOKIE_NAME = 'gaesession-sid' # session token
     DEFAULT_COOKIE_PATH = '/'
     SESSION_EXPIRE_TIME = 7200 # sessions are valid for 7200 seconds (2 hours)
     CLEAN_CHECK_PERCENT = 50 # By default, 50% of all requests will clean the database
