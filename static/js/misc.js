@@ -55,7 +55,7 @@ function gotoPage(url)
 
 function refreshPage()
 {
-    window.location.href = window.location;
+    location.reload(true);
 }
 
 function SetCookie(cookieName, cookieValue, nDays)
