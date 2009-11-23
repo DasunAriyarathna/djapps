@@ -7,12 +7,6 @@ sys.path.append("/opt/google/google_appengine/lib/yaml/lib")
 
 from google.appengine.ext import db
 
-print "---------------------------------------------"
-print "Arguments: ", sys.argv
-print "---------------------------------------------"
-print "Sys Path: ", sys.path
-print "---------------------------------------------"
-
 if len(sys.argv) < 2:
     print "Usage: %s app_id [host]" % sys.argv[0]
     sys.exit(1)
