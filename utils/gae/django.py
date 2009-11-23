@@ -20,9 +20,5 @@ def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip"):
 
     sys.path.insert(0, django_path)
 
-    print "-" * 80
-    print "Sys Path: ", sys.path
-    print "-" * 80
-
     # Must set this env var before importing any part of Django
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
