@@ -1,11 +1,4 @@
 
-import types
-from decimal import *
-from django.utils import simplejson as json
-from django.http import HttpResponse, HttpResponseRedirect
-
-import json as djjson
-
 API_SUCCESS     = "success"
 API_FAILURE     = "failure"
 API_BINARY      = "binary"
