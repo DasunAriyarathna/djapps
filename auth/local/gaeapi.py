@@ -12,6 +12,15 @@ def get_current_local_user(request):
         user = models.LocalUser.get(userkey)
     return user
 
+def get_session_id(request):
+    if hasattr(request, "session") and SESSION_KEY in request.session:
+        print >> sys.stderr, "=" * 80
+        print >> sys.stderr, request.session
+        print >> sys.stderr, request.COOKIES
+        print >> sys.stderr, "=" * 80
+        return request.session[SESSION_KEY]
+    return None
+
 def login(request, local_user):
     local_user.last_login = datetime.datetime.now()
     local_user.put()

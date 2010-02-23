@@ -1,32 +1,18 @@
 import code, getpass, sys, os
 
-sys.path.append("/opt/google/google_appengine")
-sys.path.append("/opt/google/google_appengine/lib/yaml/lib")
-# sys.path.append(os.path.abspath("."))
-# sys.path.append(os.path.abspath("../django.zip"))
+def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/google_appengine"):
+    if gae_path not in sys.path:
+        sys.path.append("/opt/google/google_appengine")
+        sys.path.append("/opt/google/google_appengine/lib/yaml/lib")
+        # sys.path.append(os.path.abspath("."))
+        # sys.path.append(os.path.abspath("../django.zip"))
 
-from google.appengine.ext import db
+    from google.appengine.ext import db
 
-if len(sys.argv) < 2:
-    print "Usage: %s app_id [host]" % sys.argv[0]
-    sys.exit(1)
+    os.environ['DJANGO_SETTINGS_MODULE']    = "settings"
+    os.environ['APPLICATION_ID']            = app_id
 
-app_id              = sys.argv[1]
-host                = "%s.appspot.com" % app_id
-batch_save_limit    = 250
-
-if len(sys.argv) > 2:
-    host = sys.argv[2]
-
-os.environ['DJANGO_SETTINGS_MODULE']    = "settings"
-os.environ['APPLICATION_ID']            = app_id
-
-def auth_func():
-    print "Authenticating....."
-    if 'GAE_PASSWORD' in os.environ:
-        return 'sri.panyam@gmail.com', os.environ['GAE_PASSWORD']
-    else:
-        return 'sri.panyam@gmail.com', getpass.getpass('Password:')
+    return register_stubs(app_id, host)
 
 def register_stubs(app_id, host):
     from google.appengine.ext.remote_api import remote_api_stub
@@ -44,16 +30,27 @@ def register_stubs(app_id, host):
     # disable proxy for local hosts
     if  host.lower().find("localhost") >= 0:
         print "Deploying to development server: ", host, "...."
-        batch_save_limit            = 1000
         os.environ['http_proxy']    = ""
         os.environ['HTTP_PROXY']    = ""
         os.environ['https_proxy']   = ""
         os.environ['HTTPS_PROXY']   = ""
         secure                      = False
+        production                  = False
     else:
         print "Deploying to production server: ", host, "...."
         secure                      = True 
+        production                  = True
+
+    def auth_func():
+        print "Authenticating....."
+        username = os.environ.get("GAE_USERNAME", None)
+        password = os.environ.get("GAE_PASSWORD", None)
+        if not username:
+            username = getpass.getpass('Username: ')
+        if not password:
+            password = getpass.getpass('Password: ')
+        return username, password
 
     remote_api_stub.ConfigureRemoteDatastore(app_id, '/remote_api', auth_func, host, secure = secure)
+    return production
 
-register_stubs(app_id, host)
