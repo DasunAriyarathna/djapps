@@ -45,9 +45,9 @@ def register_stubs(app_id, host):
         print "Authenticating....."
         username = os.environ.get("GAE_USERNAME", None)
         password = os.environ.get("GAE_PASSWORD", None)
-        if not username:
+        if username is None:
             username = getpass.getpass('Username: ')
-        if not password:
+        if password is None:
             password = getpass.getpass('Password: ')
         return username, password
 
