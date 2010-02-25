@@ -46,9 +46,11 @@ def register_stubs(app_id, host):
         username = os.environ.get("GAE_USERNAME", None)
         password = os.environ.get("GAE_PASSWORD", None)
         if username is None:
-            username = getpass.getpass('Username: ')
+            username = getpass.getpass('Could not find GAE_USERNAME environment variable.  \n' +
+                                        'Please enter Username: ')
         if password is None:
-            password = getpass.getpass('Password: ')
+            password = getpass.getpass('Could not find GAE_PASSWORD environment variable.  \n' +
+                                        'Please enter Password: ')
         return username, password
 
     remote_api_stub.ConfigureRemoteDatastore(app_id, '/remote_api', auth_func, host, secure = secure)
