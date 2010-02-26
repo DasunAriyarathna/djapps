@@ -321,9 +321,9 @@ class Session(object):
         query = _AppEngineUtilities_Session.all()
         query.filter('sid', self.sid)
         if self.check_user_agent:
-            query.filter('ua', os.environ['HTTP_USER_AGENT'])
+            query.filter('ua', os.environ.get('HTTP_USER_AGENT', "Unknown"))
         if self.check_ip:
-            query.filter('ip', os.environ['REMOTE_ADDR'])
+            query.filter('ip', os.environ.get('REMOTE_ADDR', ""))
         results = query.fetch(1)
         if len(results) is 0:
             return None
