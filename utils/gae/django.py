@@ -14,6 +14,9 @@ def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip", server
     if not server_software:
         server_software = os.environ.get('SERVER_SOFTWARE',"")
 
+    print "=" * 80
+    print "Server Software: ", server_software
+
     # Set logging and use the real django folders instead of
     # django zip in dev mode
     if server_software.startswith('Dev'):
