@@ -56,7 +56,7 @@ def delete_objects(objs):
 # Delete all objects in a class
 #
 def delete_all_objects(obj_class):
-    print "Deleting all objects of class ", obj_class
+    print >> sys.stderr, "Deleting all objects of class ", obj_class
     obj_class.objects.all().delete()
 
 # 
