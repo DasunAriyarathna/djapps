@@ -77,5 +77,4 @@ class UrlfetchFetcher(fetchers.HTTPFetcher):
       else:
         break
 
-    return fetchers.HTTPResponse(url, resp.status_code, resp.headers,
-                                 resp.content)
+    return fetchers.HTTPResponse(url, resp.status_code, resp.headers, resp.content)

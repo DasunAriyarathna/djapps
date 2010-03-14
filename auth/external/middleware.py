@@ -3,7 +3,7 @@ import sys, time, logging
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
-from djapps.auth import get_session
+from djapps.auth.sessions import get_session
 import djapps.auth.external
 import models as djmodels
 from djapps.dynamo.helpers import get_objects, get_first_object, get_or_create_object
