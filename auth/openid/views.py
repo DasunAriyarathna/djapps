@@ -10,13 +10,14 @@ import  djapps.utils.json           as djjson
 from    djapps.utils                import api_result
 from    djapps.utils                import urls as djurls
 from    djapps.dynamo               import helpers as dynhelpers
-from    djapps.auth                 import REDIRECT_FIELD_NAME
 from    djapps.auth.openid          import PROVIDERS_KEY, default_user_maker
 
 from openid import fetchers
 from openid.consumer.consumer import Consumer
 from openid.consumer import discover
+from openid.consumer.discover import DiscoveryFailure
 from openid.extensions import pape, sreg, ax
+from openid.yadis.manager import Discovery
 
 if settings.USING_APPENGINE:
     import gaefetcher as fetcher
@@ -37,6 +38,61 @@ def get_consumer(request):
         consumer_instance = Consumer(request.openid_session, store.DatastoreStore())
 
     return consumer_instance
+
+def make_openid_redirect_url(the_consumer, openid_session, openid_url, full_request_url,
+                             login_complete_url = "/openid/login/complete",
+                             redirect_field_name = "next",
+                             redirect_to = "/"):
+    try:
+        disco = Discovery(openid_session, openid_url, the_consumer.session_key_prefix)
+        try:
+            service = disco.getNextService(discover.discover)
+        except fetchers.HTTPFetchingError, why:
+            raise DiscoveryFailure(
+                'Error fetching XRDS document: %s' % (why[0],), None)
+
+        auth_request = the_consumer.beginWithoutDiscovery(service)
+        # auth_request = the_consumer.begin(openid_url)
+    except discover.DiscoveryFailure, e:
+        logging.error("Error during OpenID provider discovery: " + str(e))
+        return api_result(-1, e)
+    except discover.XRDSError, e:
+        logging.error("Error parsing XRDS from provider: " + str(e))
+        return api_result(-1, e)
+
+    # request.openid_session.claimed_id = auth_request.endpoint.claimed_id
+    # request.openid_session.server_url = auth_request.endpoint.server_url
+    # request.openid_session.save()
+
+    # this is messy - we need the extension type to be specified
+    # elsewhere instead of having to hardcode it all here
+    fetch_request = ax.FetchRequest()
+    fetch_request.add(ax.AttrInfo("http://schema.openid.net/contact/email", 1, True, "email"))
+    fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/first", 1, True, "firstname"))
+    fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/last", 1, True, "lastname"))
+    auth_request.addExtension(fetch_request)
+
+
+    sreg_request = sreg.SRegRequest(optional=['nickname', 'fullname', 'email'])
+    auth_request.addExtension(sreg_request)
+
+    pape_request = pape.Request([pape.AUTH_MULTI_FACTOR,
+                                 pape.AUTH_MULTI_FACTOR_PHYSICAL,
+                                 pape.AUTH_PHISHING_RESISTANT,
+                                 ])
+    auth_request.addExtension(pape_request)
+
+    parts               = list(urlparse.urlparse(full_request_url))
+    parts[2]            = login_complete_url
+    parts[4]            = 'session_id=%s' % openid_session.sid
+    if redirect_to: parts[4] += '&%s=%s' % (redirect_field_name, redirect_to)
+
+    parts[5]    = ''
+    return_to   = urlparse.urlunparse(parts)
+    realm       = urlparse.urlunparse(parts[0:2] + [''] * 4)
+
+    redirect_url = auth_request.redirectURL(realm, return_to)
+    return redirect_url
 
 # 
 # The initiate url is called when the user selects to "sign in with XXX"
@@ -67,66 +123,29 @@ def get_consumer(request):
 # themselves.
 #
 def openid_login_initiate(request,
-                          redirect_field_name   = REDIRECT_FIELD_NAME,
+                          redirect_field_name   = "next",
                           login_complete_url    = "/openid/login/complete"):
     if request.method == "GET":
         # redirect back to the login page
         return HttpResponseRedirect(djurls.get_login_url())
     elif request.method == "POST":
         # paramount!  without this no XRDS can be fetched 
-        openid_url = request.POST.get('openid_url')
+        openid_url  = request.POST.get('openid_url')
+        redirect_to = request.REQUEST.get(redirect_field_name, '')
         if not openid_url:
             return api_result(-1, "OpenID Provider URL Not Specified")
 
         the_consumer = get_consumer(request)
         if not the_consumer:
             return api_result(-1, "Could not create consumer object")
+    
+        full_request_url    = djurls.get_site_url() + "/" + request.get_full_path()
+        redirect_url = make_openid_redirect_url(the_consumer, request.openid_session, openid_url, 
+                                                full_request_url,
+                                                login_complete_url,
+                                                redirect_field_name,
+                                                redirect_to)
 
-        try:
-            auth_request = the_consumer.begin(openid_url)
-        except discover.DiscoveryFailure, e:
-            logging.error("Error during OpenID provider discovery: " + str(e))
-            return api_result(-1, e)
-        except discover.XRDSError, e:
-            logging.error("Error parsing XRDS from provider: " + str(e))
-            return api_result(-1, e)
-
-        # request.openid_session.claimed_id = auth_request.endpoint.claimed_id
-        # request.openid_session.server_url = auth_request.endpoint.server_url
-        # request.openid_session.save()
-
-        # this is messy - we need the extension type to be specified
-        # elsewhere instead of having to hardcode it all here
-        fetch_request = ax.FetchRequest()
-        fetch_request.add(ax.AttrInfo("http://schema.openid.net/contact/email", 1, True, "email"))
-        fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/first", 1, True, "firstname"))
-        fetch_request.add(ax.AttrInfo("http://axschema.org/namePerson/last", 1, True, "lastname"))
-        auth_request.addExtension(fetch_request)
-
-
-        sreg_request = sreg.SRegRequest(optional=['nickname', 'fullname', 'email'])
-        auth_request.addExtension(sreg_request)
-
-        pape_request = pape.Request([pape.AUTH_MULTI_FACTOR,
-                                     pape.AUTH_MULTI_FACTOR_PHYSICAL,
-                                     pape.AUTH_PHISHING_RESISTANT,
-                                     ])
-        auth_request.addExtension(pape_request)
-
-        redirect_to = request.REQUEST.get(redirect_field_name, '')
-        full_url    = djurls.get_site_url() + "/" + request.get_full_path()
-
-        parts       = list(urlparse.urlparse(full_url))
-        parts[2]    = login_complete_url
-
-        parts[4]    = 'session_id=%s' % request.openid_session.sid
-        if redirect_to: parts[4] += '&%s=%s' % (redirect_field_name, redirect_to)
-
-        parts[5]    = ''
-        return_to   = urlparse.urlunparse(parts)
-        realm       = urlparse.urlunparse(parts[0:2] + [''] * 4)
-
-        redirect_url = auth_request.redirectURL(realm, return_to)
         logging.debug('Redirecting to %s' % redirect_url)
         return HttpResponseRedirect(redirect_url)
 
@@ -145,7 +164,7 @@ def openid_login_initiate(request,
 # create a "Default" user, but other types like UserAliases can also be
 # created in this method.
 #
-def openid_login_complete(request, redirect_field_name = REDIRECT_FIELD_NAME, user_maker = default_user_maker):
+def openid_login_complete(request, redirect_field_name = "next", user_maker = default_user_maker):
     the_consumer = get_consumer(request)
     if not the_consumer:
         return api_result(-1, "Could not create consumer object")

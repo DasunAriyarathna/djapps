@@ -7,10 +7,13 @@ def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/g
         # sys.path.append(os.path.abspath("."))
         # sys.path.append(os.path.abspath("../django.zip"))
 
-    from google.appengine.ext import db
-
     os.environ['DJANGO_SETTINGS_MODULE']    = "settings"
     os.environ['APPLICATION_ID']            = app_id
+
+    import urllib2
+    from djapps.utils import proxy
+    opener = urllib2.build_opener(proxy.SkippableProxyHandler("localhost", "localhost:8080"))
+    urllib2.install_opener(opener)
 
     return register_stubs(app_id, host)
 
@@ -25,7 +28,6 @@ def register_stubs(app_id, host):
     apiproxy_stub_map.apiproxy.RegisterStub('memcache', memcache_stub.MemcacheServiceStub()) 
     apiproxy_stub_map.apiproxy.RegisterStub('mail', mail_stub.MailServiceStub()) 
     apiproxy_stub_map.apiproxy.RegisterStub('datastore_v3', datastore_file_stub.DatastoreFileStub(app_id, '/dev/null', '/dev/null'))
-
 
     # disable proxy for local hosts
     if  host.lower().find("localhost") >= 0:

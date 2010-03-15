@@ -1,8 +1,6 @@
 
 from django.conf import settings
 
-REDIRECT_FIELD_NAME     = "next"
-
 if settings.USING_APPENGINE:
     from djapps.gaeutils.sessions import Session
     def get_session(cookie_name, cookies = None):
