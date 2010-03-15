@@ -12,7 +12,7 @@ def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/g
 
     import urllib2
     from djapps.utils import proxy
-    opener = urllib2.build_opener(proxy.SkippableProxyHandler("localhost", "localhost:8080"))
+    opener = urllib2.build_opener(proxy.SkippableProxyHandler(["localhost", "localhost:8080"]))
     urllib2.install_opener(opener)
 
     return register_stubs(app_id, host)
