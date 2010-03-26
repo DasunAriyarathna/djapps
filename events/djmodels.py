@@ -6,7 +6,7 @@ from django.contrib import admin as djangoadmin
 from django.utils.translation import ugettext_lazy as _
 from djapps.dynamo import djmodels as djmod
 import djapps.auth.external.models as djauth
-import datetime
+import datetime, logging
 
 # 
 # A task that will be queued to be performed by the server asynchronously.
@@ -150,5 +150,5 @@ try:
     djangoadmin.site.register(DJEvent)
     djangoadmin.site.register(DJTask)
 except AlreadyRegistered, ar:
-    print "Already registered..."
+    logging.warning("Already registered...")
 
