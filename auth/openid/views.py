@@ -169,7 +169,6 @@ def openid_login_complete(request, redirect_field_name = "next", user_maker = de
     if not the_consumer:
         return api_result(-1, "Could not create consumer object")
 
-
     full_url    = djurls.get_site_url() + request.get_full_path()
     response    = the_consumer.complete(request.GET, full_url)
     if not hasattr(request.openid_session, PROVIDERS_KEY):
@@ -179,13 +178,6 @@ def openid_login_complete(request, redirect_field_name = "next", user_maker = de
         sreg_data = sreg.SRegResponse.fromSuccessResponse(response)
         pape_data = pape.Response.fromSuccessResponse(response)
         fetch_data = ax.FetchResponse.fromSuccessResponse(response)
-
-        print >> sys.stderr, "================================================================"
-        print >> sys.stderr, "Response Sucess: sreg, pape: ", sreg_data, pape_data
-        if sreg_data:
-            print >> sys.stderr, "SReg_Data.items(): ", sreg_data.items()
-        print >> sys.stderr, "ServerUrl, Claimed_id: ", response.endpoint.server_url, response.endpoint.claimed_id
-        print >> sys.stderr, "================================================================"
 
         new_user, new_created = user_maker(response.endpoint.claimed_id, response.endpoint.server_url)
         if new_user:
@@ -204,7 +196,7 @@ def openid_login_complete(request, redirect_field_name = "next", user_maker = de
                 new_user.email      = email[0]
             dynhelpers.save_objects(new_user)
 
-            redirect_to = request.REQUEST.get(redirect_field_name, '')
+            redirect_to = request.REQUEST.get(redirect_field_name, '/')
             return HttpResponseRedirect(redirect_to)
 
     logging.exception("============================================================")
