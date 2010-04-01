@@ -1,0 +1,44 @@
+
+Bayeux.  We are closely flowing the bayeux protocol to enable event
+dispatching and handling in our system.
+
+Unlike a real event system, events are not dispatched from the server to
+the client, but instead requested by the client.  This is because Google
+AppEngine does not allow comet.  Once this is done, pushing will also be
+done.
+
+But a very important issue is to have handlers for events.  If a client
+pushes an event to the server, it will be to one or more channels.  We need
+some processing in the server to "push" these events.  eg,
+
+In a chat, if a user sends a message, it is an event.  But handling this
+event (by the server) would mean storing it in a chat (message) database
+for later retrieval.
+
+Similarly in a game, a "make_move" event by a client would mean actually
+making the move and recording it, so we can present it in a ticker.
+
+Also the idea is that when events published and pulled by the client (or
+pushed to the client if server can push to the client - with coment), we
+want certain callbacks to be applied to the message that is application
+specific.
+
+So a message like:
+
+    /game/piece/move - "1, 2, 4, 5" 
+    
+will store the event with the payload "1,2,4,5" in the DB but along with
+this, we also call a few call back functions associated with the above
+channel (/game/piece/move).  These callbacks are the ones that will do the
+actual work for us.
+
+Similarly, when we do a call to get a list of move events (so we can be
+updated on when our turn is), we simply do a pull to:
+
+    /game/piece/moves
+
+This is similar to a server doing a "publish" message on specific channels.
+
+So how does this work in the real world with a website hosted on a
+non-comet web server using polling for getting updates.
+
