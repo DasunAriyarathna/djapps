@@ -21,6 +21,7 @@ def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip", server
     # django zip in dev mode
     if server_software.startswith('Dev'):
         logging.debug("Using Dev Server ===============" + os.path.abspath(os.curdir))
+        # django_path = os.path.abspath(django_dir)
         django_path = django_dir
         logging.getLogger().setLevel(logging.DEBUG)
 
