@@ -255,7 +255,7 @@ class Session(object):
                 else:
                     self.session.ua = None
                 if 'REMOTE_ADDR' in os.environ:
-                    self.session.ip = os.environ['REMOTE_ADDR']
+                    self.session.ip = os.environ.get('REMOTE_ADDR',"localhost:8080")
                 else:
                     self.session.ip = None
                 self.session.sid = [self.sid]
@@ -310,7 +310,7 @@ class Session(object):
         Create a new session id.
         """
         sid = str(self.session.key()) + md5.new(repr(time.time()) + \
-		os.environ['REMOTE_ADDR'] + \
+		os.environ.get('REMOTE_ADDR',"localhost:8080") + \
                 str(random.random())).hexdigest()
         return sid
 
@@ -323,7 +323,7 @@ class Session(object):
         if self.check_user_agent:
             query.filter('ua', os.environ.get('HTTP_USER_AGENT', "Unknown"))
         if self.check_ip:
-            query.filter('ip', os.environ.get('REMOTE_ADDR', ""))
+            query.filter('ip', os.environ.get('REMOTE_ADDR', "localhost:8080"))
         results = query.fetch(1)
         if len(results) is 0:
             return None

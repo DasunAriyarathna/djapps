@@ -105,14 +105,14 @@ def delete_all_objects(obj_class, num_del = 300, **filters):
             return
         else:
             if num_del > num_objs: num_del = num_objs
-            print >> sys.stderr, "Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class))
+            logging.debug("Deleting %d/%d objects of class %s" % (num_del, num_objs, str(obj_class)))
             count = 0
             while count < 5:
                 try:
                     db.delete(objs)
                     count = 5
                 except db.Timeout:
-                    print "Timeout error - continuing %d..." % count
+                    logging.error("Timeout error - continuing %d..." % count)
                     count += 1
 
 # 

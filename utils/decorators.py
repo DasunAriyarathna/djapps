@@ -78,7 +78,7 @@ def send_unauthenticated_response(request, *args, **kwds):
                                   settings.FORMAT_PARAM,
                                   djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
     if format == "json":
-        return HttpResponse(djjson.json_encode(api_result(-1, "Unable to authenticate user.")), content_type = "application/json")
+        return api_result(-1, "Unable to authenticate user.")
     else:
         return HttpResponseRedirect(djurls.get_login_url(request.path))
     

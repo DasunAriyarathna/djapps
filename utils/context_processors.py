@@ -5,6 +5,7 @@ def site_urls(request):
     full_path   = request.get_full_path()
     return {'site_url': settings.SITE_URL,
             'static_host': settings.PROJ_STATIC_HOST,
+            'request_path': request.path,
             'lang': request.LANGUAGE_CODE.split('-'),
             'format_param': settings.FORMAT_PARAM,
             'url_path_prefix': djurls.make_url(),

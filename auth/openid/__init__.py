@@ -31,9 +31,6 @@ def default_user_maker(user_id, server_url):
         dynhelpers.save_objects(user)
     return user, new_created
 
-def user_alias_from_key(user_id, server_url):
-    pass
-
 class OpenIDContext(object):
     def __init__(self, request):
         self.request = request
@@ -82,7 +79,8 @@ class OpenIDContext(object):
             user = user_finder(user_id, provider)
             if not user:
                 # remove the provider then
-                del providers[provider]
+                if provider:
+                    del providers[provider]
                 self.request.openid_session[PROVIDERS_KEY] = providers
 
         return user
