@@ -67,7 +67,7 @@ class LazyOpenIDContext(object):
 #
 class OpenIDAuthMiddleware(object):
     def __init__(self):
-        print >> sys.stderr, "Initialising OpenIDAuth Middleware..."
+        pass
 
     def process_request(self, request):
         # create a new session object ONLY for the openid stuff so we
