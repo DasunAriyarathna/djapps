@@ -19,9 +19,10 @@ def default_user_maker(user_id, server_url):
     if settings.USING_APPENGINE:
         from djapps.auth.local.gaemodels import LocalUser
     else:
+        assert False, "Do we need to resize the username field in django User model"
         from django.contrib.auth.models import User as LocalUser
 
-    username    = user_id # base64.encodestring(user_id).replace("\n", "")
+    username    = user_id
     user        = dynhelpers.get_first_object(LocalUser, username = username)
     new_created = False
     if not user:
