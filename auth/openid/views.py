@@ -164,7 +164,9 @@ def openid_login_initiate(request,
 # create a "Default" user, but other types like UserAliases can also be
 # created in this method.
 #
-def openid_login_complete(request, redirect_field_name = "next", user_maker = default_user_maker):
+def openid_login_complete(request,
+                          redirect_field_name = "next",
+                          user_maker = default_user_maker):
     the_consumer = get_consumer(request)
     if not the_consumer:
         return api_result(-1, "Could not create consumer object")
