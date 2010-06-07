@@ -17,6 +17,13 @@
  */
 
 /**
+ * The document being maintained and edited.
+ */
+function EqnDocument()
+{
+}
+
+/**
  * A node in the equation tree.
  */
 function EqnNode()
@@ -25,33 +32,14 @@ function EqnNode()
      * Can this node be navigated?
      */
     this.navigateable   = true;
-
-    /**
-     * Renders the node.
-     */
-    this.renderFunc = null;
-}
-
-/**
- * Class for calculating the size of a node's size.
- */
-function EqnNodeSizeCalculator()
-{
-    /**
-     * Calculate the node's width and height.
-     */
-    this.getWidth   = function(node) { return 0; }
-    this.getHeight  = function(node) { return 0; }
 }
 
 /**
  * Render's a node onto a context.
  */
-function EqnNodeRenderer()
-{
-    this.render = function(node, x, y) {
-    }
-}
+function EqnNodeRenderer() { }
+EqnNode.prototype.render    = function(attribs, x, y) { }
+EqnNode.prototype.getSize   = function(attribs) { }
 
 /**
  * Leafs in the equation tree.
