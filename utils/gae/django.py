@@ -25,7 +25,8 @@ def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip", server
         django_path = django_dir
         logging.getLogger().setLevel(logging.DEBUG)
 
-    sys.path.insert(0, django_path)
+    if django_path not in sys.path:
+        sys.path.insert(0, django_path)
 
     # Must set this env var before importing any part of Django
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
