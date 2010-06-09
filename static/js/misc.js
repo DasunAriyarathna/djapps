@@ -1,5 +1,7 @@
 
-String.prototype.trim = function() { return this.replace(/^\s+|\s+$/, ''); };
+// String.prototype.trim = function() { return this.replace(/^\s+|\s+$/, ''); };
+String.prototype.trim = function() { return this.replace(/^\s*/, "").replace(/\s*$/, ""); };
+
 var EmailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
 // Major version of Flash required
@@ -13,10 +15,18 @@ var requiredRevision = 124;
 function ajaxErrorHandler(data)
 {
     var errorsWindow = window.open("", "errors_window", "width=800, height=800, resizable=yes, scrollbars=yes, toolbar=no");
-    errorsWindow.focus();
-    errorsWindow.document.open();
-    errorsWindow.document.write(data.responseText);
-    errorsWindow.document.close();
+    if (errorsWindow == null)
+    {
+        // probably blocked by the browser?
+        alert("Could not show errors.  Please enable popup windows in your browser for this host");
+    }
+    else
+    {
+        errorsWindow.focus();
+        errorsWindow.document.open();
+        errorsWindow.document.write(data.responseText);
+        errorsWindow.document.close();
+    }
 }
 
 // Wrapper for doing an ajax request.

@@ -2,8 +2,8 @@ import code, getpass, sys, os
 
 def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/google_appengine"):
     if gae_path not in sys.path:
-        sys.path.append("/opt/google/google_appengine")
-        sys.path.append("/opt/google/google_appengine/lib/yaml/lib")
+        sys.path.append(gae_path)
+        sys.path.append(gae_path + "/lib/yaml/lib")
         # sys.path.append(os.path.abspath("."))
         # sys.path.append(os.path.abspath("../django.zip"))
 
@@ -18,6 +18,10 @@ def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/g
     return register_stubs(app_id, host)
 
 def register_stubs(app_id, host):
+    print sys.path
+    import google
+    import google.appengine
+    from google.appengine.ext import remote_api
     from google.appengine.ext.remote_api import remote_api_stub
     from google.appengine.api import apiproxy_stub_map
     from google.appengine.api import datastore_file_stub
