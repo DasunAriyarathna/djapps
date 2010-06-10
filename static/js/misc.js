@@ -11,6 +11,11 @@ var requiredMinorVersion = 0;
 // Minor version of Flash required
 var requiredRevision = 124;
 
+function urlencode(str)
+{
+    return escape(str).replace(/\+/g, "%2B").replace(/\//g, "%2F");
+}
+
 // Generic handler for all ajax errors!
 function ajaxErrorHandler(data)
 {
