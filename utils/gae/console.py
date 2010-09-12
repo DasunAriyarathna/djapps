@@ -4,6 +4,7 @@ def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/g
     if gae_path not in sys.path:
         sys.path.append(gae_path)
         sys.path.append(gae_path + "/lib/yaml/lib")
+        sys.path.append(gae_path + "/lib/fancy_urllib")
         # sys.path.append(os.path.abspath("."))
         # sys.path.append(os.path.abspath("../django.zip"))
 
