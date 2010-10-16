@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from . import api_result
 import json as djjson
 
+JSON_CONTENT_TYPE = "application/json"
+
 def format_response(func):
     """ Takes a result and converts to an appropriate response object.
         A function that uses this as a decorator, must return one of the
@@ -38,12 +40,12 @@ def format_response(func):
                                               settings.FORMAT_PARAM,
                                               djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
                 if format == "json" or len(result) < 2:
-                    return HttpResponse(djjson.json_encode(result[0]), content_type = "application/json")
+                    return HttpResponse(djjson.json_encode(result[0]), content_type = JSON_CONTENT_TYPE)
                 else:
                     from django.template import RequestContext
                     context = RequestContext(request)
                     return render_to_response(result[1], result[0], context)
-            return HttpResponse(djjson.json_encode(result))
+            return HttpResponse(djjson.json_encode(result), content_type = JSON_CONTENT_TYPE)
     return format_response_method
 
 # 
