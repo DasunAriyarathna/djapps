@@ -1,6 +1,6 @@
 import logging, os, sys
 
-def setup_django(django_dir = "Django-1.1", django_zip = "django1.1.zip", server_software = None):
+def setup_django(django_dir = "Django-1.1.2", django_zip = "django1.1.2.zip", server_software = None):
     # remove the standard version of django - django 0.96
     for k in [ k for k in sys.modules if k.lower().startswith('django') ]:
         logging.debug(" ========== Deleting Module: " + k + ", " + str(sys.modules[k]))

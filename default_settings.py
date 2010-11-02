@@ -27,7 +27,7 @@ LANGUAGE_CODE = 'en-us'
 USE_I18N = False
 
 # Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
+# Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -35,15 +35,27 @@ MEDIA_ROOT = ''
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = ''
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+# Absolute path to the directory that holds media.
+# Example: "/home/media/media.lawrence.com/static/"
+STATICFILES_ROOT = ''
+
+# URL that handles the static files served from STATICFILES_ROOT.
+# Example: "http://static.lawrence.com/", "http://example.com/static/"
+STATICFILES_URL = '/static/'
+
+# URL prefix for admin media -- CSS, JavaScript and images.
+# Make sure to use a trailing slash.
+# Examples: "http://foo.com/static/admin/", "/static/admin/".
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
+# A list of locations of additional static files
+STATICFILES_DIRS = ()
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+#     'django.template.loaders.eggs.Loader',
 )
 
 ROOT_URLCONF = 'urls'
@@ -73,6 +85,29 @@ SITE_AUTHENTICATORS = {
     'djapps.auth.external.authenticators.AuthLocalSite': {
         'host_site':        "LocalSite",
     },
+}
+
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django.request':{
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
 }
 
 # The root folder of THIS project

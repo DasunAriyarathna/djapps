@@ -7,7 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from . import api_result
 import json as djjson
 
-JSON_CONTENT_TYPE = "application/json"
+# JSON_CONTENT_TYPE = "application/json"
+JSON_CONTENT_TYPE = "text/html"
 
 def format_response(func):
     """ Takes a result and converts to an appropriate response object.
