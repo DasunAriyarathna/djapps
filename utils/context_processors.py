@@ -3,16 +3,18 @@ import settings, sys
 
 def site_urls(request):
     full_path   = request.get_full_path()
-    return {'site_url': settings.SITE_URL,
+    out =  {'site_url': settings.SITE_URL,
             'static_host': settings.PROJ_STATIC_HOST,
             'request_path': request.path,
-            'lang': request.LANGUAGE_CODE.split('-'),
             'format_param': settings.FORMAT_PARAM,
             'url_path_prefix': djurls.make_url(),
             'login_link': djurls.get_login_url(full_path),
             'logout_link': djurls.get_logout_url(full_path),
             'manage_logins_link': djurls.get_manage_logins_url(full_path),
             'register_link': djurls.get_register_url("/")}
+    if "LANGUAGE_CODE" in request:
+        out['lang'] = request.LANGUAGE_CODE.split('-')
+    return out
 
 def gae_local_auth(request):
     # drop in replacement for django auth context_processes 
