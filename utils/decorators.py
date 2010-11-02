@@ -36,16 +36,18 @@ def format_response(func):
             elif type(result) is tuple:
                 import request as djrequest
                 from django.conf import settings
+                content_type = djrequest.get_getvar(request, "content_type", JSON_CONTENT_TYPE)
                 format = djrequest.get_getvar(request,
                                               settings.FORMAT_PARAM,
                                               djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
                 if format == "json" or len(result) < 2:
-                    return HttpResponse(djjson.json_encode(result[0]), content_type = JSON_CONTENT_TYPE)
+                    return HttpResponse(djjson.json_encode(result[0]), content_type = content_type)
                 else:
                     from django.template import RequestContext
                     context = RequestContext(request)
                     return render_to_response(result[1], result[0], context)
-            return HttpResponse(djjson.json_encode(result), content_type = JSON_CONTENT_TYPE)
+            content_type = djrequest.get_getvar(request, "content_type", JSON_CONTENT_TYPE)
+            return HttpResponse(djjson.json_encode(result), content_type = content_type)
     return format_response_method
 
 # 
