@@ -19,6 +19,7 @@ def save_objects(*objects):
             to_save.extend(obj)
         else:
             to_save.extend([obj])
+
     count = 0
     while count < 3:
         try:

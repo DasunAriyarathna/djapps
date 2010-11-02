@@ -1,16 +1,14 @@
 
-import datetime
+import datetime, __builtin__
 from django.utils import simplejson
 from django.utils.simplejson import decoder
 
 class OurJsonEncoder(simplejson.JSONEncoder):
     def default(self, o):
-        if type(o) is datetime.datetime:
-            return str(o)
-        elif hasattr(o, "to_json"):
-            return o.to_json()
-        elif hasattr(o, "toJson"):
-            return o.toJson()
+        if type(o) is datetime.datetime: return str(o)
+        elif hasattr(o, "to_json"): return o.to_json()
+        elif hasattr(o, "toJson"): return o.toJson()
+        # elif type(o) is __builtin__.generator: return [super(OurJsonEncoder, self).default(val) for val in o]
         return super(OurJsonEncoder, self).default(o)
 
 def json_encode(data):
