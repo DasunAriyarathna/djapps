@@ -1,0 +1,30 @@
+
+{% extends "djapps/utils/templates/base.html" %}
+
+{% block page_title %} super.block {% endblock page_title %}
+
+{% block pageheader %} API Call Result {% endblock %}
+
+{% block content_block %}
+    {% if success %}
+        
+        {% block success_block %} {% endblock %}
+
+    {% else %}
+
+        {% if failure %}
+            {% block failure_block %}
+                <p>
+                Error Code: {{ failure.code }}
+                <p>
+                Error Message: {{ failure.message }}
+            {% endblock %}
+        {% else %}
+            Unknown Error
+        {% endif %}
+
+    {% endif %}
+{% endblock content_block %}
+
+{% block pagefooter %} super.block {% endblock %}
+
