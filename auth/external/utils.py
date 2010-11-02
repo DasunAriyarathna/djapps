@@ -32,6 +32,7 @@ def load_site_authenticators():
 
     for auth_params in settings.SITE_AUTHENTICATORS:
         params          = auth_params
+        print "Auth Params: ", auth_params
         auth_class      = load_authenticator_class(auth_params['class'])
         auth_instance   = auth_class(**params)
         auth_instance.host_site  = get_first_object(authextmodels.HostSite, site_name = params['host_site'].lower())
