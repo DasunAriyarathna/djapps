@@ -13,7 +13,14 @@ import djmodels as dnmod
 #
 @transaction.commit_on_success
 def save_objects(*objects):
+    to_save = []
     for obj in objects:
+        if type(obj) is list:
+            to_save.extend(obj)
+        else:
+            to_save.extend([obj])
+
+    for obj in to_save:
         obj.save()
 
 # 
