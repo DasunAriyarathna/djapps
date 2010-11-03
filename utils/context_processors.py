@@ -12,7 +12,7 @@ def site_urls(request):
             'logout_link': djurls.get_logout_url(full_path),
             'manage_logins_link': djurls.get_manage_logins_url(full_path),
             'register_link': djurls.get_register_url("/")}
-    if "LANGUAGE_CODE" in request:
+    if hasattr(request, "LANGUAGE_CODE"):
         out['lang'] = request.LANGUAGE_CODE.split('-')
     return out
 
