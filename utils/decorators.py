@@ -47,6 +47,7 @@ def format_response(func):
                     from django.template import RequestContext
                     context = RequestContext(request)
                     return render_to_response(result[1], result[0], context)
+            import request as djrequest
             content_type = djrequest.get_getvar(request, "content_type", JSON_CONTENT_TYPE)
             return HttpResponse(djjson.json_encode(result), content_type = content_type)
     return format_response_method
