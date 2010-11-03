@@ -1,9 +1,18 @@
 #!/bin/sh
 
 dbname=$1
-sudo -u postgres dropdb $dbname
-sudo -u postgres createdb $dbname
-sudo -u postgres dropuser $dbname
-sudo -u postgres createuser $dbname -s
-python2.5 manage.py syncdb
+pgdir=$2
+
+if [ "$pgdir" = "" ]; then
+    sudo -u postgres dropdb $dbname
+    sudo -u postgres createdb $dbname
+    sudo -u postgres dropuser $dbname
+    sudo -u postgres createuser $dbname -s
+else
+    sudo -u postgres $pgdir/dropdb $dbname
+    sudo -u postgres $pgdir/createdb $dbname
+    sudo -u postgres $pgdir/dropuser $dbname
+    sudo -u postgres $pgdir/createuser $dbname -s
+fi
+python manage.py syncdb
 

@@ -37,7 +37,7 @@ MEDIA_URL = ''
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/static/"
-STATICFILES_ROOT = ''
+# STATICFILES_ROOT = ''
 
 # URL that handles the static files served from STATICFILES_ROOT.
 # Example: "http://static.lawrence.com/", "http://example.com/static/"
@@ -49,7 +49,7 @@ STATICFILES_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # A list of locations of additional static files
-STATICFILES_DIRS = ()
+# STATICFILES_DIRS = ()
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
