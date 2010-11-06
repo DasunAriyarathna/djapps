@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-import datetime, random, sha
 import djmodels as models
 
 def login(request, user):
