@@ -1,4 +1,51 @@
 from distutils.core import setup
+from distutils.command.install_data import install_data
+from distutils.command.install import INSTALL_SCHEMES
+import os, sys
+
+DJAPPS_DIR = 'djapps'
+
+# Tell distutils to put the data_files in platform-specific installation
+# locations. See here for an explanation:
+# http://groups.google.com/group/comp.lang.python/browse_thread/thread/35ec7b2fed36eaec/2105ee4d9e8042cb
+for scheme in INSTALL_SCHEMES.values():
+    scheme['data'] = scheme['purelib']
+
+def fullsplit(path, result=None):
+    """
+    Split a pathname into components (the opposite of os.path.join) in a
+    platform-neutral way.
+    """
+    if result is None:
+        result = []
+    head, tail = os.path.split(path)
+    if head == '':
+        return [tail] + result
+    if head == path:
+        return result
+    return fullsplit(head, [tail] + result)
+
+def get_all_sub_folders(parent):
+    packages, data_files, scripts = [], [], []
+    root_dir = os.path.dirname(__file__)
+    if root_dir != '':
+        os.chdir(root_dir)
+    for dirpath, dirnames, filenames in os.walk(parent):
+        # Ignore dirnames that start with '.'
+        for i, dirname in enumerate(dirnames):
+            if dirname.startswith('.'):
+                del dirnames[i]
+        if '__init__.py' in filenames:
+            packages.append('.'.join(fullsplit(dirpath)))
+        elif filenames:
+            data_files.append([dirpath, [os.path.join(dirpath, f) for f in filenames]])
+    return packages, data_files, scripts
+
+packages, data_files, scripts = get_all_sub_folders(DJAPPS_DIR)
+
+print "Packages: ", packages
+print "Datafiles: ", data_files
+print "Scripts: ", scripts
 
 setup(name="Djapps",
       version="0.0.1",
@@ -6,46 +53,7 @@ setup(name="Djapps",
       author="Sri Panyam",
       author_email="sri.panyam@gmail.com",
       url="http://code.google.com/p/djapps/",
-      package_data = {'djapps': ['static/']},
-      packages = [
-          "djapps",
-          "djapps/auth",
-          "djapps/auth/external",
-          "djapps/auth/external/hosts",
-          "djapps/auth/external/hosts/fb",
-          "djapps/auth/external/hosts/iphone",
-          "djapps/auth/external/hosts/myspace",
-          "djapps/auth/external/hosts/twitter",
-          "djapps/auth/external/sites",
-          "djapps/auth/local",
-          "djapps/auth/openid",
-          "djapps/config",
-          "djapps/dynamo",
-          "djapps/events",
-          "djapps/gaeutils",
-          "djapps/gaeutils/contrib",
-          "djapps/gaeutils/contrib/auth",
-          "djapps/payments",
-          "djapps/payments/paypal",
-          "djapps/scripts",
-          "djapps/static",
-          "djapps/static/auth",
-          "djapps/static/auth/external",
-          "djapps/static/auth/external/fb",
-          "djapps/static/auth/external/fb/connect",
-          "djapps/static/auth/external/google",
-          "djapps/static/auth/external/twitter",
-          "djapps/static/auth/external/twitter/icons",
-          "djapps/static/flash",
-          "djapps/static/flash/history",
-          "djapps/static/js",
-          "djapps/static/js/eqn",
-          "djapps/templates",
-          "djapps/templates/auth",
-          "djapps/utils",
-          "djapps/utils/gae",
-          "djapps/utils/templates",
-          "djapps/utils/templatetags",
-      ]
+      # scripts = scripts,
+      packages = packages,
+      data_files = data_files
       )
-    
