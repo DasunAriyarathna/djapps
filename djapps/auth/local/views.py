@@ -1,4 +1,4 @@
-import datetime, random, sha, sys, logging
+import datetime, random, sys, logging
 
 from django.conf import settings
 from django.template import RequestContext, loader
