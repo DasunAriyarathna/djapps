@@ -140,7 +140,10 @@ def get_object_id(obj):
     """
     Returns the ID of a db object
     """
-    return obj.key().id_or_name()
+    if obj.is_saved():
+        return obj.key().id_or_name()
+    else:
+        return None
 
 def are_keys_equal(obj1, obj2):
     """
