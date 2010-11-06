@@ -1,5 +1,10 @@
 
-from djapps.dynamo.helpers import get_object_id, get_object_by_id
+import djapps, sys
+import djapps.dynamo
+
+print >> sys.stderr, dir(djapps.dynamo)
+
+from djapps.dynamo import helpers as djhelpers
 
 import models, sys
 
@@ -20,6 +25,7 @@ def get_user_aliases(request):
     if  (not hasattr(request, "ms_session")) or \
         SESSION_USER_ALIAS_LIST not in request.ms_session: return []
 
+    from djapps.dynamo.helpers import get_object_by_id
     aliaslist = request.ms_session[SESSION_USER_ALIAS_LIST]
     return [ get_object_by_id(models.UserAlias, id) for id in aliaslist ]
 
@@ -30,7 +36,7 @@ def login_useralias(request, ualias):
     if not is_useralias_logged_in(request, ualias):
         # then add the user
         aliaslist = request.ms_session[SESSION_USER_ALIAS_LIST]
-        aliaslist[get_object_id(ualias)] = True
+        aliaslist[djhelpers.get_object_id(ualias)] = True
         request.ms_session[SESSION_USER_ALIAS_LIST] = aliaslist
 
 def is_useralias_logged_in(request, ualias):
@@ -41,7 +47,7 @@ def is_useralias_logged_in(request, ualias):
         request.ms_session[SESSION_USER_ALIAS_LIST] = {}
         return False
 
-    uid = get_object_id(ualias)
+    uid = djhelpers.get_object_id(ualias)
 
     return uid in request.ms_session[SESSION_USER_ALIAS_LIST]
 
@@ -50,5 +56,5 @@ def logout_useralias(request, ualias):
     logged in users in the current request, if it exists. """
 
     if is_useralias_logged_in(request, ualias):
-        del request.ms_session[SESSION_USER_ALIAS_LIST][get_object_id(ualias)]
+        del request.ms_session[SESSION_USER_ALIAS_LIST][djhelpers.get_object_id(ualias)]
 
