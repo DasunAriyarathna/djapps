@@ -2,7 +2,6 @@
 from django.db import models
 from django.db.models import Q
 from django.db import transaction
-from django.contrib.auth.models import User
 import datetime, os, sys, logging
 
 import djmodels as dnmod

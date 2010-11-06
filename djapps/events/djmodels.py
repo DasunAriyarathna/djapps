@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib import admin as djangoadmin
 from django.utils.translation import ugettext_lazy as _
 from djapps.dynamo import djmodels as djmod
-import djapps.auth.external.models as djauth
+from djapps.auth.external import models as djauthmodels
 import datetime, logging
 
 # 
@@ -58,7 +58,7 @@ class DJTask(models.Model):
     # 
     # Which user triggered this task?
     #
-    task_owner      = models.ForeignKey(djauth.UserAlias, null = True)
+    task_owner      = models.ForeignKey(djauthmodels.UserAlias, null = True)
 
     # 
     # When task was created

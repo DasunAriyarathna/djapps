@@ -1,7 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.contrib import admin as djangoadmin
-import datetime
 
 # 
 # A table to hold counters for object classes
@@ -57,6 +54,12 @@ class DJBOBFragment(models.Model):
     #
     class Admin: save_on_top = True
 
-djangoadmin.site.register(DJCounter)
-djangoadmin.site.register(DJBOBFragment)
+from django.contrib import admin as djangoadmin
+try:
+    djangoadmin.site.register(DJCounter)
+    djangoadmin.site.register(DJBOBFragment)
+except:
+    import sys, traceback
+    traceback.print_exc()
+    print >> sys.stderr, "Dynamo Models Already Registered..."
 
