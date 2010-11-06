@@ -1,5 +1,4 @@
 
-from django.core import exceptions
 from djapps.dynamo.helpers import get_object_id, get_object_by_id
 
 import models, sys
