@@ -2,11 +2,10 @@
 from django.db import models
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.contrib import admin as djangoadmin
 from django.utils.translation import ugettext_lazy as _
 from djapps.dynamo import djmodels as djmod
 from djapps.auth.external import models as djauthmodels
-import datetime, logging
+import datetime
 
 # 
 # A task that will be queued to be performed by the server asynchronously.
@@ -143,12 +142,4 @@ class DJEvent(models.Model):
 
     # Admin Interface
     class Admin: save_on_top = True
-
-try:
-    from django.contrib.admin.sites import AlreadyRegistered
-    djangoadmin.site.register(DJSubscription)
-    djangoadmin.site.register(DJEvent)
-    djangoadmin.site.register(DJTask)
-except AlreadyRegistered, ar:
-    logging.warning("Already registered...")
 
