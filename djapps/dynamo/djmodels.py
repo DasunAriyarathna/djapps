@@ -54,12 +54,3 @@ class DJBOBFragment(models.Model):
     #
     class Admin: save_on_top = True
 
-from django.contrib import admin as djangoadmin
-try:
-    djangoadmin.site.register(DJCounter)
-    djangoadmin.site.register(DJBOBFragment)
-except:
-    import sys, traceback
-    traceback.print_exc()
-    print >> sys.stderr, "Dynamo Models Already Registered..."
-

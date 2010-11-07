@@ -2,7 +2,6 @@
 from django.db import models
 from django.db import transaction
 from django.contrib.auth.models import Group, Permission
-from django.contrib import admin as djangoadmin
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
@@ -335,10 +334,4 @@ class ExternalUser(models.Model):
             except (ImportError, ImproperlyConfigured):
                 raise SiteProfileNotAvailable
         return self._profile_cache
-
-#################   Register Models with Admin ####################
-
-djangoadmin.site.register(HostSite)
-djangoadmin.site.register(UserAlias)
-djangoadmin.site.register(ExternalUser)
 

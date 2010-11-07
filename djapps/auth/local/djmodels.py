@@ -12,6 +12,5 @@ class LocalUserRegistration(models.Model):
     salt            = models.CharField(max_length=128)
     key_expires     = models.DateTimeField()
     active          = models.BooleanField(default = False)
-
     class Admin: pass
 
