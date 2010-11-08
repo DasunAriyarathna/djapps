@@ -2,7 +2,7 @@
 
 cd $1
 version=$2
-ZIPNAME=django$version.zip
+ZIPNAME=Django$version.zip
 rm -Rf /tmp/django
 cp -r django /tmp
 cd /tmp
