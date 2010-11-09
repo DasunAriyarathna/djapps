@@ -34,13 +34,14 @@ class SelectDateTimeWidget(Widget):
 
     def __init__(self,
                  attrs=None, years=None, required=True,
-                 show_hours = True, show_minutes = True, show_seconds = True):
+                 show_hours = True, show_minutes = True, show_seconds = True, **kwargs):
         # years is an optional list/tuple of years to use in the "year" select box.
         self.attrs          = attrs or {}
         self.required       = required
         self.show_hours     = show_hours
         self.show_minutes   = show_minutes
         self.show_seconds   = show_seconds
+        self.months         = kwargs.get("month_dict", MONTHS)
         if years:
             self.years = years
         else:
@@ -80,7 +81,7 @@ class SelectDateTimeWidget(Widget):
             hour_val, minute_val, second_val    = value.hour, value.minute, value.second
 
         year_html = self.create_select(name, self.year_field, value, year_val, choices)
-        choices = MONTHS.items()
+        choices = self.months.items()
         month_html = self.create_select(name, self.month_field, value, month_val, choices)
         choices = [(i, "%02d" % i) for i in range(0, 32)]
         day_html = self.create_select(name, self.day_field, value, day_val,  choices)
