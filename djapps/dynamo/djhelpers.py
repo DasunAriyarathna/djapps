@@ -35,10 +35,16 @@ def get_object_by_id(obj_class, id):
     except obj_class.DoesNotExist: return None
 
 def create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
-    if id_val:
-        return obj_class.objects.create(pk = id_val, **kwds)
+    if save:
+        if id_val:
+            return obj_class.objects.create(pk = id_val, **kwds)
+        else:
+            return obj_class.objects.create(**kwds)
     else:
-        return obj_class.objects.create(**kwds)
+        if id_val:
+            return obj_class(pk = id_val, **kwds)
+        else:
+            return obj_class(**kwds)
 
 def get_or_create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
     try:
