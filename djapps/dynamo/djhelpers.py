@@ -47,10 +47,7 @@ def create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
             return obj_class(**kwds)
 
 def get_or_create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
-    try:
-        return obj_class.objects.get(**kwds), False
-    except obj_class.DoesNotExist:
-        return create_object(obj_class, save, parent, id_val, **kwds), True
+    return obj_class.get_or_create(**kwds)
 
 # 
 # Get a list of all objects of a certain class
