@@ -76,7 +76,7 @@ class SelectDateTimeWidget(Widget):
         choices = [(i, i) for i in self.years]
         if not value:
             # set to current time if value is not given
-            value = right_now = datetime.datetime.utcnow()
+            value = right_now = datetime.datetime.now()
             year_val, month_val, day_val        = value.year, value.month, value.day
             hour_val, minute_val, second_val    = value.hour, value.minute, value.second
 
