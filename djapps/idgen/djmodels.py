@@ -22,6 +22,9 @@ class IDGenerator(models.Model):
     # The number of bits would be ceil(log2(allowed_chars ^ key_length))
     key_length      =   models.IntegerField(default = 8)
 
+    class Meta:
+        verbose_name = "ID Generator"
+
 class GeneratedID(models.Model):
     """
     Stores a generated ID.
@@ -31,12 +34,22 @@ class GeneratedID(models.Model):
     gen_id      = models.CharField(max_length = 100)
     unique_together = (("generator", "gen_id"),)
 
+    class Meta:
+        ordering = ("generator","gen_id")
+        verbose_name = "Generated ID"
+
 class IDGeneratorRandom(models.Model):
     """
     An ID generator that simply generates random IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
     generator   = models.ForeignKey(IDGenerator)
+
+    def __str__(self):
+        return str(generator)
+
+    class Meta:
+        verbose_name = "Random ID Generator"
 
 class IDGeneratorLFSR(models.Model):
     """
@@ -45,10 +58,17 @@ class IDGeneratorLFSR(models.Model):
     """
     generator   = models.ForeignKey(IDGenerator)
 
+    def __str__(self):
+        return str(generator) + ", Seed: " + self.seed
+
     # Rolling seed for the generator
     seed        =   models.CharField(max_length = 256)
 
     # Tap bits which are taken in each step to calculate the input bit for
     # the next seed
     tap_bits    = models.CharField(max_length = 256)
+
+    class Meta:
+        verbose_name = "LFSR ID Generator"
+        verbose_name_plural = "LFSR ID Generators"
 
