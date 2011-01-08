@@ -11,7 +11,7 @@ class IDGenerator(object):
     Base class of all generator state objects.
     """
     @classmethod
-    def create_generator_state(cls, generator):
+    def create_generator_state(cls, generator, *args, **kwargs):
         """
         This method creates (or fetches) the generator state object if it
         already exists.
@@ -28,7 +28,7 @@ class IDGenerator(object):
         """
         return None
 
-class IDGeneratorRandom(object):
+class IDGeneratorRandom(IDGenerator):
     @classmethod
     def get_next_id(cls, generator):
         """
@@ -44,7 +44,7 @@ class IDGeneratorRandom(object):
             except:
                 print "Rand Value (%s) already exists. Trying again..." % val
 
-class IDGeneratorLFSR(object):
+class IDGeneratorLFSR(IDGenerator):
     @classmethod
     def create_generator_state(cls, generator, *args, **kwargs):
         """
@@ -57,12 +57,13 @@ class IDGeneratorLFSR(object):
         while not seed:
             seed = random.randint(0, len(allowed_keys) ** key_length)
 
-        num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
-        ta
+        if tap_bits not in kwargs:
+            num_bits    = utils.get_num_bits(len(allowed_chars), key_length)
+            tap_bits    = ",".join(map(str, utils.calculate_tap_bits(num_bits)))
+        else:
+            tap_bits = kwargs["tap_bits"]
 
-        id_gen_lfsr = models.IDGeneratorLFSR(generator = generator,
-                                             seed = seed,
-                                             tap_bits = kwargs.get("tap_bits"))
+        id_gen_lfsr = models.IDGeneratorLFSR(generator = generator, seed = seed, tap_bits = tap_bits)
         id_gen_lfsr.save()
         return id_gen_lfsr
 

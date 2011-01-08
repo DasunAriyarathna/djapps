@@ -36,14 +36,14 @@ class IDGeneratorRandom(models.Model):
     An ID generator that simply generates random IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
-    generator   = models.ForeignKey(generator)
+    generator   = models.ForeignKey(IDGenerator)
 
 class IDGeneratorLFSR(models.Model):
     """
     An ID generator that simply generates random IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
-    generator   = models.ForeignKey(generator)
+    generator   = models.ForeignKey(IDGenerator)
 
     # Rolling seed for the generator
     seed        =   models.CharField(max_length = 256)
