@@ -37,7 +37,7 @@ class IDGeneratorRandom(IDGenerator):
         """
         num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
         while True:
-            val = value_to_string(random.randint(0, 2 ** num_bits), generator.allowed_chars)
+            val = utils.value_to_string(random.randint(0, 2 ** num_bits), generator.allowed_chars)
             try:
                 save_id(generator, val)
                 return val
