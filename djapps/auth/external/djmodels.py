@@ -30,7 +30,7 @@ class HostSite(models.Model):
     # 
     # The external site name
     #
-    site_name   = models.CharField(max_length = 64)
+    site_name   = models.CharField(max_length = 64, unique = True)
 
     # 
     # URL for the site

@@ -27,7 +27,7 @@ class HostSite(db.Model):
     # 
     # The external site name
     #
-    site_name   = db.StringProperty()
+    site_name   = db.StringProperty()   # unique = True
 
     # 
     # URL for the site

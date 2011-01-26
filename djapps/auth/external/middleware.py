@@ -90,9 +90,9 @@ class MultiSiteAuthMiddleware(object):
             site_user_id = authenticator.authenticate(request)
             if site_user_id:
                 # fetch the associated useralias for the fb user if any
+                useralias_id = djmodels.make_useralias_id(site_user_id, authenticator.host_site),
                 useralias, newcreated = get_or_create_object(djmodels.UserAlias, True, None,
-                                                             djmodels.make_useralias_id(site_user_id,
-                                                                                        authenticator.host_site),
+                                                             useralias_id,
                                                              host_site = authenticator.host_site,
                                                              user_id = site_user_id)
                 djapps.auth.external.login_useralias(request, useralias)
