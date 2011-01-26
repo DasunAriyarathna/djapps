@@ -17,12 +17,15 @@ def setup_django(django_dir = "Django-1.1.2", django_zip = "django1.1.2.zip", se
     # django zip in dev mode
     if server_software.startswith('Dev'):
         django_path = django_dir
-        logging.getLogger().setLevel(logging.DEBUG)
     else:
         django_path = django_zip
 
+    logging.getLogger().setLevel(logging.DEBUG)
+
     if django_path not in sys.path:
         sys.path.insert(0, django_path)
+
+    print >> sys.stderr, "Path: ", django_dir, django_path, sys.path
 
     # Must set this env var before importing any part of Django
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'

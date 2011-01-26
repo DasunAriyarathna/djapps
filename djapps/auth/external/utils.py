@@ -1,6 +1,6 @@
 
-from djapps.dynamo.helpers import get_objects, get_first_object, get_or_create_object
 import models as authextmodels
+from django.utils.importlib import import_module
 
 def load_authenticator_class(full_auth_class):
     try:
@@ -27,15 +27,19 @@ def load_authenticator_class(full_auth_class):
 def load_site_authenticators():
     from django.conf import settings
     from django.core import exceptions
+    from djapps.dynamo.helpers import get_first_object
 
     authenticators = []
 
-    for auth_params in settings.SITE_AUTHENTICATORS:
-        params          = auth_params
-        print "Auth Params: ", auth_params
-        auth_class      = load_authenticator_class(auth_params['class'])
-        auth_instance   = auth_class(**params)
-        auth_instance.host_site  = get_first_object(authextmodels.HostSite, site_name = params['host_site'].lower())
+    for auth_obj in settings.SITE_AUTHENTICATORS:
+        auth_module     = import_module(auth_obj['auth_module'])
+        print "Module Contents: ", dir(auth_module)
+        auth_class      = getattr(auth_module, auth_obj['auth_class'])
+        print "Auth Class: ", auth_class
+        print "Auth Class Params: ", auth_obj
+        auth_instance   = auth_class(**auth_obj)
+        auth_instance.host_site  = get_first_object(authextmodels.HostSite,
+                                                    site_name = auth_obj['host_site'].lower())
 
         if auth_instance.host_site is None:
             assert "Authenticator Host Site is invalid!!!"

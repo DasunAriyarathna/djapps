@@ -1,10 +1,6 @@
 
 import sys, logging, md5
 from datetime import datetime
-import djapps.utils.request     as djrequtils
-from django.http import HttpResponseRedirect
-from djapps.dynamo.helpers import get_or_create_object, get_first_object
-import models as djacmodels
 import settings
 
 try:
@@ -16,8 +12,12 @@ _thread_locals = local()
 
 class Authenticator(object):
     def __init__(self, **kwargs):
+        from djapps.auth.external import models as authmodels
+        from djapps.dynamo import helpers as dynhelpers
         self.host_site_name = kwargs['host_site']
-        self.host_site      = None
+        self.host_site      = dynhelpers.get_first_object(authmodels.HostSite,
+                                                          site_name = self.host_site_name)
+        assert self.host_site is not None, "Host site must be valid."
 
     def authenticate(self, request):
         """ Authenticates a request and if successful, returns a descriptor
