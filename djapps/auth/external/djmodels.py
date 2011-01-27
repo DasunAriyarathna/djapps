@@ -74,9 +74,6 @@ class HostSite(models.Model):
 # 1. Who has controls over which sites are allowed and how are the site
 # specific authentication mechanisms/data deciphered by the application?
 #
-# TODO:
-# The primary key tuple is host_site/login_name
-#
 class UserAlias(models.Model):
     #
     # PK name for easier access - same as the site_name
