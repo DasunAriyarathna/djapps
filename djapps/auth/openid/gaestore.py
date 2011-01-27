@@ -30,26 +30,10 @@ from openid.association import Association as OpenIDAssociation
 from openid.store.interface import OpenIDStore
 from openid.store import nonce
 from google.appengine.ext import db
+from models import Association, UsedNonce
 
 # number of associations and nonces to clean up in a single request.
 CLEANUP_BATCH_SIZE = 50
-
-
-class Association(db.Model):
-  """An association with another OpenID server, either a consumer or a provider.
-  """
-  url = db.LinkProperty()
-  handle = db.StringProperty()
-  association = db.TextProperty()
-  created = db.DateTimeProperty(auto_now_add=True)
-
-
-class UsedNonce(db.Model):
-  """An OpenID nonce that has been used.
-  """
-  server_url = db.LinkProperty()
-  timestamp = db.DateTimeProperty()
-  salt = db.StringProperty()
 
 
 class DatastoreStore(OpenIDStore):

@@ -23,7 +23,6 @@ if settings.USING_APPENGINE:
     import gaefetcher as fetcher
     import gaestore as store
 else:
-    # TODO: Implement the fetcher and store for django
     import djfetcher as fetcher
     import djstore as store
 
