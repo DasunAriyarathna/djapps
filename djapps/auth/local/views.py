@@ -156,9 +156,6 @@ def account_login(request,
                 return api_result(-1, "Email confirmation not yet recieved.")
             else:
                 # user is valid:
-                print >> sys.stderr, "=" * 80
-                print >> sys.stderr, request.session.sid
-                print >> sys.stderr, "=" * 80
                 return api_result(0, {'id': str(get_object_id(login_user)),
                                       'username': login_user.username})
         else:
