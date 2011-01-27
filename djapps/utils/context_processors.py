@@ -6,6 +6,7 @@ def site_urls(request):
     out =  {'site_url': settings.SITE_URL,
             'static_host': settings.PROJ_STATIC_HOST,
             'request_path': request.path,
+            'authenticated': request.user.is_authenticated(),
             'format_param': settings.FORMAT_PARAM,
             'url_path_prefix': djurls.make_url(),
             'login_link': djurls.get_login_url(full_path),
