@@ -14,7 +14,7 @@ class Authenticator(object):
     def __init__(self, **kwargs):
         from djapps.auth.external import models as authmodels
         from djapps.dynamo import helpers as dynhelpers
-        self.host_site_name = kwargs['host_site']
+        self.host_site_name = kwargs['host_site'].lower()
         self.host_site      = dynhelpers.get_first_object(authmodels.HostSite,
                                                           site_name = self.host_site_name)
         assert self.host_site is not None, "Host site must be valid."
