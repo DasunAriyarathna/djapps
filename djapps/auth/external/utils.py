@@ -31,15 +31,20 @@ def load_site_authenticators():
 
     authenticators = []
 
-    for auth_obj in settings.SITE_AUTHENTICATORS:
+    for host_site in settings.SITE_AUTHENTICATORS:
+        auth_obj        = settings.SITE_AUTHENTICATORS[host_site]
+        if 'host_site' not in auth_obj:
+            auth_obj['host_site'] = host_site
         auth_module     = import_module(auth_obj['auth_module'])
-        print "Module Contents: ", dir(auth_module)
         auth_class      = getattr(auth_module, auth_obj['auth_class'])
+
+        print "Module Contents: ", dir(auth_module)
         print "Auth Class: ", auth_class
         print "Auth Class Params: ", auth_obj
+
         auth_instance   = auth_class(**auth_obj)
         auth_instance.host_site  = get_first_object(authextmodels.HostSite,
-                                                    site_name = auth_obj['host_site'].lower())
+                                                    site_name = host_site.lower())
 
         if auth_instance.host_site is None:
             assert "Authenticator Host Site is invalid!!!"
