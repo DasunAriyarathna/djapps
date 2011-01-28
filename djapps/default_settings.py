@@ -69,21 +69,19 @@ LOGIN_REDIRECT_URL = '/'
 # 
 # These handle authenticators of requests by foreign sites.
 #
-SITE_AUTHENTICATORS = [
-    {
+SITE_AUTHENTICATORS = {
+    'facebook': {
         'auth_module':          'djapps.auth.external.hosts.fb',
         'auth_class':           'AuthFacebook',
-        'host_site':            "Facebook",
         'FACEBOOK_API_KEY':     "",
         'FACEBOOK_SECRET_KEY':  "",     # not to be revealed
         'FACEBOOK_APP_NAME':    "",
     },
-    {
+    'local': {
         'auth_module':  'djapps.auth.external.authenticators',
         'auth_class':   'AuthLocalSite',
-        'host_site':    "LocalSite",
     },
-]
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
