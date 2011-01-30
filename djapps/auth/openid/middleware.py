@@ -3,7 +3,7 @@ import sys, time, logging
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
-from djapps.auth.sessions import get_session
+from djapps.utils.sessions import get_session
 from djapps.auth.openid import OpenIDContext
 
 # Name of the MS Session Cookie
