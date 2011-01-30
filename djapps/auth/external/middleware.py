@@ -3,7 +3,6 @@ import sys, time, logging
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
-from djapps.auth.sessions import get_session
 import djapps.auth.external
 import models as djmodels
 from djapps.dynamo.helpers import get_objects, get_first_object, get_or_create_object
@@ -81,6 +80,7 @@ class MultiSiteAuthMiddleware(object):
         if request.path.startswith("/admin/"):
             return None
 
+        from djapps.utils.sessions import get_session
         request.ms_session      = get_session(MS_SESSION_COOKIE_NAME, request.COOKIES)
 
         for authenticator in self.authenticators:
