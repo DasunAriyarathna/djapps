@@ -15,7 +15,7 @@ import api
 import  djapps.utils.decorators     as djdecos
 import  djapps.utils.request        as djrequest
 import  djapps.utils.json           as djjson
-from    djapps.utils            import api_result
+from    djapps.utils                import api_result
 
 # 
 # Processes POST request on the registration form
@@ -41,8 +41,7 @@ from    djapps.utils            import api_result
 #
 @djdecos.format_response
 def account_register(request,
-             get_template       = 'djapps/auth/register.html', 
-             post_template      = 'djapps/auth/registered.html', 
+             template_name      = 'djapps/auth/register.html', 
              email_host         = 'localhost',
              email_port         = 25,
              email_username     = "",
@@ -58,10 +57,10 @@ def account_register(request,
         format = request.GET[settings.FORMAT_PARAM]
 
     if request.method == 'GET':
-        return render_to_response(get_template, {'context': form_context})
+        return api_result(0, {'context': form_context}), template_name
     elif request.method != 'POST':
         if format == "json":
-            return api_result(-1, "Invalid request method")
+            return api_result(-1, "Invalid request method"), template_name
         else:
             return HttpResponse("Invalid request type: " + request.method)
 
@@ -77,6 +76,7 @@ def account_register(request,
     if 'UserRegClass' in form_context:
         UserRegClass = form_context['UserRegClass']
 
+    username    = post_data.get("username", "").strip()
     email       = post_data.get("email", "").strip()
     password1   = post_data.get("password1", "").strip()
     password2   = post_data.get("password2", "").strip()
@@ -97,7 +97,7 @@ def account_register(request,
     if 'first_name' in post_data: first_name = post_data['first_name']
     if 'last_name' in post_data: last_name = post_data['last_name']
     if 'nick_name' in post_data: nick_name = post_data['nick_name']
-    new_user, reg_info, new_created = api.register_user(email, password1, first_name, last_name, nick_name,
+    new_user, reg_info, new_created = api.register_user(username, email, password1, first_name, last_name, nick_name,
                                                         is_active, request, register_timeout, form_context, 
                                                         UserClass, UserRegClass, email_template, email_host, 
                                                         email_port, email_username, email_password,  email_from, 
@@ -113,9 +113,9 @@ def account_register(request,
             return HttpResponseRedirect(djurls.get_login_url())
     else:
         if format == "json":
-            return api_result(-1, "User already exists.  Please enter a new email address.")
+            return api_result(-1, "User already exists.  Please enter a new username.")
         else:
-            return HttpResponse("User already exists.  Please enter a new email address")
+            return HttpResponse("User already exists.  Please enter a new username")
 
 def account_login(request,
                   template_name='djapps/auth/login.html',
