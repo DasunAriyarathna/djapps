@@ -45,14 +45,8 @@ class HostSite(models.Model):
     def __str__(self):
         return self.site_name + "/" + str(self.site_url)
 
-    class Meta:
-        verbose_name_plural = "Foreign Sites"
-
-    # 
     # Admin Interface
-    #
-    class Admin:
-        save_on_top = True
+    class Admin: save_on_top = True
 
     # 
     # Returns a json representation
