@@ -1,5 +1,5 @@
 
-import datetime, random, sha, sys, logging, urlparse
+import logging, urlparse
 from django.conf import settings
 from django.template import RequestContext, loader
 from django.http import HttpResponseRedirect, HttpResponse
