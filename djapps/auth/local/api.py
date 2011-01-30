@@ -14,7 +14,7 @@ else:
 # 
 # Quick way to register a user to the local site.
 #
-def register_user(email, password, 
+def register_user(username, email, password, 
                  firstname = "", lastname = "", displayname = "",
                  is_active = True, request = None,
                  register_timeout = 2, form_context = {},
@@ -28,8 +28,10 @@ def register_user(email, password,
 	             email_subject      = "Your Account Confirmation",
                  ):
     reg_info = None
-    new_user, newcreated    = get_or_create_object(UserClass, False, username = email, email = email)
+    new_user, newcreated    = get_or_create_object(UserClass, False, username = username, email = email)
     if newcreated:
+        new_user.username       = username
+        new_user.email          = email
         new_user.first_name     = firstname
         new_user.last_name      = lastname
         new_user.is_active      = is_active
