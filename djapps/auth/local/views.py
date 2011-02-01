@@ -126,6 +126,9 @@ def account_login(request,
     """
     from djapps.auth.local import forms as authforms
     redirect_to = request.REQUEST.get(redirect_field_name, '')
+    # Light security check -- make sure redirect_to isn't garbage.
+    if not redirect_to or ' ' in redirect_to:
+        redirect_to = settings.LOGIN_REDIRECT_URL
     if request.method == "POST":
         format = None
         if settings.FORMAT_PARAM in request.GET:
@@ -142,9 +145,6 @@ def account_login(request,
             elif not login_user.is_active:
                 return api_result(-1, "Account is inactive.")
             else:
-                # Light security check -- make sure redirect_to isn't garbage.
-                if not redirect_to or ' ' in redirect_to:
-                    redirect_to = settings.LOGIN_REDIRECT_URL
                 api.login(request, login_user)
                 if request.session.test_cookie_worked():
                     request.session.delete_test_cookie()
