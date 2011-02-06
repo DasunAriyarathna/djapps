@@ -16,8 +16,8 @@ def json_encode(data):
 
 def json_decode(data):
     if data:
-        from django.utils.simplejson.decoder import JSONDecoder as jdec
-        return jdec().decode(data)
+        from django.utils import simplejson
+        return simplejson.JSONDecoder().decode(data)
     else:
         return None
 
