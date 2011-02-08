@@ -32,7 +32,6 @@ from    .       import      api_result
 # pattern!
 #
 @djdecos.format_response
-# @djdecos.ensure_user_logged_in("post", "put", "delete")
 def manual_resource_handler(request, handler_class, handler_suffix,
                             method_param = "__method__", *args, **kwargs):
     format = djrequest.get_getvar(request, settings.FORMAT_PARAM,
@@ -50,14 +49,20 @@ def manual_resource_handler(request, handler_class, handler_suffix,
     if themethod:
         return themethod(request, format, *args, **kwargs)
     else:
-        from django.http import Http404
-        raise Http404
+        # fall back to default_handler_....
+        methodname  = "default_handler_" + handler_suffix
+        themethod   = getattr(handler_class, methodname, None)
+        if themethod:
+            return themethod(request, format, *args, **kwargs)
+        else:
+            from django.http import Http404
+            raise Http404
 
-def resturl(regex, handler, suffix,
+def resturl(regex, handler_class, suffix,
             kwargs = None, name = None, prefix='',
             handler_function = manual_resource_handler):
     if not kwargs: kwargs = {}
-    kwargs['handler_class']     = handler
+    kwargs['handler_class']     = handler_class
     kwargs['handler_suffix']    = suffix
     return url(regex, handler_function, kwargs, name, prefix)
 
