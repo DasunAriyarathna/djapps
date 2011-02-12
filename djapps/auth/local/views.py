@@ -90,7 +90,7 @@ def account_register(request,
     if 'first_name' in post_data: first_name = post_data['first_name']
     if 'last_name' in post_data: last_name = post_data['last_name']
     if 'nick_name' in post_data: nick_name = post_data['nick_name']
-    new_user, reg_info, new_created = api.register_user(username, email, password, first_name, last_name, nick_name,
+    new_user, reg_info, new_created = api.register_user(email, email, password, first_name, last_name, nick_name,
                                                         is_active, request, register_timeout, form_context, 
                                                         UserClass, UserRegClass, email_template, email_host, 
                                                         email_port, email_username, email_password,  email_from, 
