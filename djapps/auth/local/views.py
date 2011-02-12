@@ -78,16 +78,9 @@ def account_register(request,
 
     username    = post_data.get("username", "").strip()
     email       = post_data.get("email", "").strip()
-    password1   = post_data.get("password1", "").strip()
-    password2   = post_data.get("password2", "").strip()
+    password    = post_data.get("password", "").strip()
     if not email:
         return api_result(-1, "Email is mandatory")
-
-    if not password1:
-        return api_result(-1, "Please enter a valid password")
-
-    if password1 != password2:
-        return api_result(-1, "Passwords must match")
 
     # 
     # Form is now validated
@@ -97,7 +90,7 @@ def account_register(request,
     if 'first_name' in post_data: first_name = post_data['first_name']
     if 'last_name' in post_data: last_name = post_data['last_name']
     if 'nick_name' in post_data: nick_name = post_data['nick_name']
-    new_user, reg_info, new_created = api.register_user(username, email, password1, first_name, last_name, nick_name,
+    new_user, reg_info, new_created = api.register_user(username, email, password, first_name, last_name, nick_name,
                                                         is_active, request, register_timeout, form_context, 
                                                         UserClass, UserRegClass, email_template, email_host, 
                                                         email_port, email_username, email_password,  email_from, 
