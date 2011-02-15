@@ -76,8 +76,8 @@ def account_register(request,
     if 'UserRegClass' in form_context:
         UserRegClass = form_context['UserRegClass']
 
-    username    = post_data.get("username", "").strip()
-    email       = post_data.get("email", "").strip()
+    username    = post_data.get("username", "").strip().lower()
+    email       = post_data.get("email", "").strip().lower()
     password    = post_data.get("password", "").strip()
     if not email:
         return api_result(-1, "Email is mandatory")
@@ -101,7 +101,8 @@ def account_register(request,
 
     if new_created:
         if format == "json":
-            return api_result(0, "User created.  Confirmation email sent.")
+            return api_result(0, {'id': str(get_object_id(new_user)),
+                                  'username': new_user.username})
         else:
             return HttpResponseRedirect(djurls.get_login_url())
     else:
