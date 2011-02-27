@@ -80,11 +80,6 @@ class UserLogin(models.Model):
     #
     last_login  = models.DateTimeField(_('last login'), default=datetime.datetime.now)
 
-    # 
-    # game/user are a unique primary key
-    #
-    unique_together = ("user_id", "host_site")
-
     def __str__(self):
         return self.user_id + "@" + self.host_site.site_name
 
@@ -99,5 +94,8 @@ class UserLogin(models.Model):
 
     # Admin Interface
     class Admin: save_on_top = True
-    class Meta: verbose_name = "User Login"
+    class Meta:
+        # game/user are a unique primary key
+        unique_together = ("user_id", "host_site")
+        verbose_name = "User Login"
 
