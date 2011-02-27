@@ -32,9 +32,9 @@ class GeneratedID(models.Model):
     """
     generator   = models.ForeignKey(IDGenerator)
     gen_id      = models.CharField(max_length = 100)
-    unique_together = (("generator", "gen_id"),)
 
     class Meta:
+        unique_together = (("generator", "gen_id"),)
         ordering = ("generator","gen_id")
         verbose_name = "Generated ID"
 

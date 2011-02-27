@@ -47,7 +47,8 @@ class DJBOBFragment(models.Model):
     # 
     # bob_id/bob_fragment are a unique primary key
     #
-    unique_together = ("bob", "fragment")
+    class Meta:
+        unique_together = ("bob", "fragment")
 
     # 
     # Admin Interface
