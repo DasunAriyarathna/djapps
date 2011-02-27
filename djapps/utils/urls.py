@@ -56,8 +56,8 @@ def get_reg_confirm_url(fwd_url = None):
 # 
 # More helpers for making account based URLs
 #
-def make_account_url(action, fwd_url):
-    out_url = "accounts/" + action
+def make_account_url(action, fwd_url, prefix = "accounts/"):
+    out_url = prefix + action
 
     if fwd_url:
         out_url += ("?next=" + fwd_url)
