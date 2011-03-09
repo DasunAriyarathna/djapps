@@ -11,8 +11,8 @@ class OurJsonEncoder(simplejson.JSONEncoder):
         elif hasattr(o, "toJson"): return o.toJson()
         elif isinstance(o, djangoforms.BaseForm):
             out = {}
-            if hasattr(o, instance):
-                out['instance'] = super(OurJsonEncoder, self).default(o.instance)
+            if hasattr(o, "instance"):
+                out["instance"] = json_encode(getattr(o, "instance"))
             return out
         # elif type(o) is __builtin__.generator: return [super(OurJsonEncoder, self).default(val) for val in o]
         return super(OurJsonEncoder, self).default(o)
