@@ -51,24 +51,3 @@ class DJCounterShard(db.Model):
     #
     count       = db.IntegerProperty(default = 0)
 
-# 
-# Big OBject fragment.
-#
-class DJBOBFragment(db.Model):
-    MAX_BOB_SIZE            = 500
-
-    # 
-    # Which attribute does this fragment belong to?
-    #
-    bob_name    = db.StringProperty()
-
-    # 
-    # BOB Fragment ID
-    #
-    fragment    = db.IntegerProperty()
-
-    # 
-    # Contents of the BOB fragment
-    #
-    contents    = db.ByteStringProperty(default = "")
-

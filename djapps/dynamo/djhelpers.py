@@ -109,55 +109,6 @@ def increment_counter(name, incr = 1):
     return counter.count
 
 #################################################################################
-#                   Django specific stuff to create/change bobs                 #
-#################################################################################
-
-# 
-# gets the data within all the bob fragments of a bob
-#
-def get_bob_data(bob_name):
-    if bob_name:
-        frags   = dnmod.DJBOBFragment.objects.filter(bob_name = bob_name).order_by("fragment")
-        bobdata = "".join([f.contents for f in frags])
-        return bobdata
-    else:
-        return ""
-
-# 
-# Sets the data within all the bob fragments of a bob
-# Can only pass in string data here.
-# Returns all the fragments so we dont save it here and let the 
-# caller save it in one go
-#
-def set_bob_data(bob_name, data_str):
-    # 
-    # delete previous fragments
-    #
-    dnmod.DJBOBFragment.objects.filter(bob_name = bob_name).delete()
-
-    # 
-    # recreate fragments
-    #
-    # TODO: be smart about it and only delete fragments 
-    # that are over the size.
-    #
-    str_val     = data_str
-    part1       = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
-    fragindex   = 0
-    output      = []
-
-    while part1 != "":
-        fragment = dnmod.DJBOBFragment(bob_name = bob_name, fragment = fragindex, contents = part1)
-        output.append(fragment)
-
-        str_val = str_val[dnmod.DJBOBFragment.MAX_BOB_SIZE : ]
-        part1 = str_val[ : dnmod.DJBOBFragment.MAX_BOB_SIZE]
-
-        fragindex += 1
-
-    return output
-
-#################################################################################
 #                           Creating Dynamic Models                             #
 #################################################################################
 def create_model(name, fields=None, app_label='', module='', options=None, admin_opts=None):
