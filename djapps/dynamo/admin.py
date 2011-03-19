@@ -1,10 +1,9 @@
 
-from models import DJCounter, DJBOBFragment
+from models import DJCounter
 
 try:
     from django.contrib import admin as djangoadmin
     djangoadmin.site.register(DJCounter)
-    djangoadmin.site.register(DJBOBFragment)
 except:
     import sys, traceback
     traceback.print_exc()
