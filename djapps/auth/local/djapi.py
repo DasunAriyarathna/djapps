@@ -11,6 +11,8 @@ def verify_uname_password(username, password):
 
 def set_password(user, raw_password, save = True):
     user.set_password(raw_password)
+    if save:
+        user.save()
 
 #
 # Authenticate a user
