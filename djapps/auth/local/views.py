@@ -128,7 +128,7 @@ def account_login(request,
         if settings.FORMAT_PARAM in request.GET:
             format = request.GET[settings.FORMAT_PARAM]
 
-        username = request.POST.get("username", "").strip()
+        username = request.POST.get("username", "").strip().lower()
         password = request.POST.get("password", "").strip()
 
         login_user = None
