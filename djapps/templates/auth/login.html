@@ -1,0 +1,71 @@
+{% block title %} {% endblock %}
+{% block extracss %}
+<style type="text/css">
+    .HeadingCell
+    {
+        font-weight:    bold;
+        vertical-align: top;
+        padding:    10px;
+    }
+    .ValueCell
+    {
+        padding:    10px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<br/>
+<form method = "POST" action="/accounts/login">
+    {% if NotConfirmed %}
+    <center>
+    You have not confirmed your account registration.  Please follow the
+    instructions in the email sent to you and try again.
+    </center>
+    {% endif %}
+    <p>
+    <center>
+    <table>
+        <tr>
+        <td><table>
+            <tr>
+                <td valign = top class=HeadingCell> <label for=username>Email/Username: </label></td>
+                <td valign = top class=ValueCell>
+                    <input id = username name = username type=textfield value=""><br/>
+                </td>
+            </tr>
+            <tr> <td colspan = 2> {{ form.username.errors }} </td> </tr>
+            <tr>
+                <td valign = top class=HeadingCell> <label for=password>Password: </label> </td>
+                <td valign = top class=ValueCell>
+                    <input id = password name = password type=password value=""><br/>
+                </td>
+            </tr>
+            <tr> <td colspan = 2> {{ form.password.errors }} </td> </tr>
+            <tr>
+                <td colspan = 2>
+                    <center><input id = signin type=submit name = signin value="Sign In"></center>
+                </td>
+            </tr>
+        </table></td></tr>
+        <tr><td height = "100px" width = "100px" > <center> or connect with: </center> </td></tr>
+        <tr><td valign = top>
+        <center>
+        <fb:login-button onlogin="user_logged_in();"></fb:login-button>
+        </center>
+        </td></tr>
+    </table>
+    </center>
+    <input type = hidden id = "next" name = "next" value = "{{next}}"/>
+</form>
+<br/>
+<script type = "text/javascript">
+function user_logged_in()
+{
+    // ok now close the box, and go to the "next" page
+    window.location = "{{next}}";
+    // FB.Facebook.get_sessionState().waitUntilReady(function() {alert('Hello world - Session now ready');})
+    // - next = ' + "{{next}}");
+}
+</script>
+{% endblock %}
+
