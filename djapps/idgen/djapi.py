@@ -1,6 +1,15 @@
 
 import random, sys, models, constants, math, utils, gen_classes
 
+def get_id_generator(name):
+    """
+    Gets the ID Gen by name if it exists.
+    """
+    try:
+        return models.IDGenerator.objects.get(name = name)
+    except models.IDGenerator.DoesNotExist:
+        return None
+
 def create_id_generator(name,
                         gen_type = "gen_classes.IDGeneratorRandom",
                         allowed_chars = constants.UPPER_ALNUM,
@@ -25,10 +34,12 @@ def create_id_generator(name,
     # create the state object
     return generator
 
-def get_next_id(generator_name):
+def get_next_id(generator_or_name):
     """
     Gets the next ID using the generator.
     """
-    generator   = models.IDGenerator.objects.get(pk = generator_name)
+    generator = generator_or_name
+    if type(generator) in (str, unicode):
+        generator = models.IDGenerator.objects.get(pk = generator)
     return eval(generator.gen_type).get_next_id(generator)
 
