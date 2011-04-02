@@ -23,7 +23,6 @@ class StringIDField(models.CharField):
         """
         Returns field's value just before saving.
         """
-        print "Model Instance, id, Add, Value: ", model_instance, model_instance.id, add, getattr(model_instance, self.attname)
         if add: # new instance so create a new ID value
             # if the idgen is a string then we can use it as is
             if type(self.id_genfunc) in (str, unicode):
