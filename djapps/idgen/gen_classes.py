@@ -28,6 +28,14 @@ class IDGenerator(object):
         """
         return None
 
+    @classmethod
+    def release_id(cls, generator, id):
+        """
+        Releases an ID back to the pool.
+        """
+        return None
+        models.GeneratedID.objects.filter(id = id, generator = generator).delete()
+
 class IDGeneratorRandom(IDGenerator):
     @classmethod
     def get_next_id(cls, generator):
