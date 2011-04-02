@@ -3,11 +3,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.db import models
 import api as idgenapi
 
-class StringIDField(models.Field):
+class StringIDField(models.CharField):
     """
     A field that can be used to provide random IDs.
     """
     description = _("A field that can create random IDs using an id generator.")
+
     def __init__(self, idgen, key_length, *args, **kwargs):
         assert idgen != None, "%ss must have a valid idgen field value" % self.__class__.__name__
         assert key_length and key_length > 0, "%ss must have a positive key_length" % self.__class__.__name__
@@ -15,13 +16,8 @@ class StringIDField(models.Field):
         self.id_generator = None
         self.key_length = key_length
         self.initialised = False
+        kwargs['max_length'] = key_length
         super(StringIDField, self).__init__(*args, **kwargs)
-
-    def db_type(self, connection):
-        """
-        Get the DB Type.
-        """
-        return 'varchar(%d)' % self.key_length
 
     def pre_save(self, model_instance, add):
         """
@@ -40,16 +36,5 @@ class StringIDField(models.Field):
             setattr(model_instance, self.attname, value)
             return value 
         else:
-            super(StringIDField, self).pre_save(model_instance, add)
-
-    def get_internal_type(self):
-        return "CharField"
-
-    def to_python(self, value):
-        if isinstance(value, basestring) or value is None:
-            return value
-        return smart_unicode(value)
-
-    def get_prep_value(self, value):
-        return self.to_python(value)
+            return super(StringIDField, self).pre_save(model_instance, add)
 
