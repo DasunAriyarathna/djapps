@@ -37,3 +37,13 @@ class StringIDField(models.CharField):
         else:
             return super(StringIDField, self).pre_save(model_instance, add)
 
+# allow South to handle StringIDField smoothly
+try:
+    from south.modelsinspector import add_introspection_rules
+    # For a normal StringIDField, the add_rendered_field attribute is
+    # always True, which means no_rendered_field arg will always be
+    # True in a frozen StringIDField, which is what we want.
+    add_introspection_rules(rules=[((StringIDField,), [], {})],
+                            patterns=['djapps\.idgen\.fields\.'])
+except ImportError:
+    pass
