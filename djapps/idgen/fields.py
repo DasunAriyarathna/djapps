@@ -47,3 +47,4 @@ try:
                             patterns=['djapps\.idgen\.fields\.'])
 except ImportError:
     pass
+
