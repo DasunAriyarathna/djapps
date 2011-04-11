@@ -22,7 +22,7 @@ class IDGenerator(object):
         return None
 
     @classmethod
-    def get_next_id(cls, generator, hint = None):
+    def get_next_id(cls, generator):
         """
         Calculates the next ID for a particular generator.
         """
@@ -36,20 +36,30 @@ class IDGenerator(object):
         return None
         models.GeneratedID.objects.filter(id = id, generator = generator).delete()
 
+class IDGeneratorSerial(IDGenerator):
+    @classmethod
+    def get_next_id(cls, generator):
+        """
+        Calculates the next ID for a particular generator.
+        This creates IDs serially.
+        """
+        num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
+        while True:
+            val = models.GeneratedID.objects.filter(generator = generator).count()
+            val = utils.value_to_string(val, generator.allowed_chars)
+            try:
+                save_id(generator, val)
+                return val
+            except:
+                print "Rand Value (%s) already exists. Trying again..." % val
+
 class IDGeneratorRandom(IDGenerator):
     @classmethod
-    def get_next_id(cls, generator, hint = None):
+    def get_next_id(cls, generator):
         """
         Calculates the next ID for a particular generator.
         This creates IDs at random and waits till there are no collissions.
         """
-        if hint:    # see if we can use the hint first!
-            try:
-                save_id(generator, hint)
-                return hint
-            except:
-                print "Hint Value (%s) already exists..." % hint
-
         num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
         while True:
             val = utils.value_to_string(random.randint(0, 2 ** num_bits), generator.allowed_chars)
@@ -83,7 +93,7 @@ class IDGeneratorLFSR(IDGenerator):
         return id_gen_lfsr
 
     @classmethod
-    def get_next_id(cls, generator, hint = None):
+    def get_next_id(cls, generator):
         """
         Calculates the next ID for a particular generator.
         This creates IDs at random and waits till there are no collissions.

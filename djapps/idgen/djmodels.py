@@ -38,6 +38,19 @@ class GeneratedID(models.Model):
         ordering = ("generator","gen_id")
         verbose_name = "Generated ID"
 
+class IDGeneratorSerial(models.Model):
+    """
+    An ID generator that simply generates serial IDs and checks the DB for
+    collissions.  Not optimal but good for now.
+    """
+    generator   = models.ForeignKey(IDGenerator)
+
+    def __str__(self):
+        return str(generator)
+
+    class Meta:
+        verbose_name = "Serial ID Generator"
+
 class IDGeneratorRandom(models.Model):
     """
     An ID generator that simply generates random IDs and checks the DB for
