@@ -34,12 +34,12 @@ def create_id_generator(name,
     # create the state object
     return generator
 
-def get_next_id(generator_or_name):
+def get_next_id(generator_or_name, hint = None):
     """
     Gets the next ID using the generator.
     """
     generator = generator_or_name
     if type(generator) in (str, unicode):
         generator = models.IDGenerator.objects.get(pk = generator)
-    return eval(generator.gen_type).get_next_id(generator)
+    return eval(generator.gen_type).get_next_id(generator, hint)
 
