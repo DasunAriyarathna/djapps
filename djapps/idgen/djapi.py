@@ -27,12 +27,23 @@ def create_id_generator(name,
                                      allowed_chars = allowed_chars,
                                      key_length = key_length,
                                      gen_type = gen_type)
-    generator.save()     # will fail if name exists
+    generator.save()     # will fail if name exists so catch the DB Error
 
     eval(gen_type).create_generator_state(generator, **kwargs)
 
     # create the state object
     return generator
+
+def get_or_create_id_generator(name, *args, **kwargs):
+    """
+    Creates an id generator with a given name and arguments.  If it already
+    exists, then returns the existing one.
+    """
+    try:
+        return create_id_generator(name, *args, **kwargs)
+    except django.db.DatabaseError, ie:
+        print "ID Generator (%s) already exists." % name
+        return get_id_generator(name)
 
 def get_next_id(generator_or_name):
     """
