@@ -1,38 +1,7 @@
 from google.appengine.ext import db
+import utils
 
 UNUSABLE_PASSWORD = '!' # This will never be a valid hash
-
-def get_hexdigest(algorithm, salt, raw_password):
-    """
-    Returns a string of the hexdigest of the given plaintext password and salt
-    using the given algorithm ('md5', 'sha1' or 'crypt').
-    Stolen from django for compatibility.
-    """
-    from django.utils.encoding import smart_str
-    raw_password, salt = smart_str(raw_password), smart_str(salt)
-    if algorithm == 'crypt':
-        try:
-            import crypt
-        except ImportError:
-            raise ValueError('"crypt" password algorithm not supported in this environment')
-        return crypt.crypt(raw_password, salt)
-    # The rest of the supported algorithms are supported by hashlib, but
-    # hashlib is only available in Python 2.5.
-    try:
-        import hashlib
-    except ImportError:
-        if algorithm == 'md5':
-            import md5
-            return md5.new(salt + raw_password).hexdigest()
-        elif algorithm == 'sha1':
-            import sha
-            return sha.new(salt + raw_password).hexdigest()
-    else:
-        if algorithm == 'md5':
-            return hashlib.md5(salt + raw_password).hexdigest()
-        elif algorithm == 'sha1':
-            return hashlib.sha1(salt + raw_password).hexdigest()
-    raise ValueError("Got unknown password algorithm type in password.")
 
 def check_password(raw_password, enc_password):
     """
@@ -40,7 +9,7 @@ def check_password(raw_password, enc_password):
     encryption formats behind the scenes.
     """
     algo, salt, hsh = enc_password.split('$')
-    return hsh == get_hexdigest(algo, salt, raw_password)
+    return hsh == utils.get_hexdigest(algo, salt, raw_password)
 
 # 
 # A user in the model - not like Appengine'e User object.
@@ -92,11 +61,7 @@ class LocalUser(db.Model):
         return full_name.strip()
 
     def set_password(self, raw_password):
-        import random
-        algo = 'sha1'
-        salt = get_hexdigest(algo, str(random.random()), str(random.random()))[:5]
-        hsh = get_hexdigest(algo, salt, raw_password)
-        self.password = '%s$%s$%s' % (algo, salt, hsh)
+        self.password = utils.salt_password(raw_password)
 
     def check_password(self, raw_password):
         """
@@ -106,7 +71,7 @@ class LocalUser(db.Model):
         # Backwards-compatibility check. Older passwords won't include the
         # algorithm or salt.
         if '$' not in self.password:
-            is_correct = (self.password == get_hexdigest('md5', '', raw_password))
+            is_correct = (self.password == utils.get_hexdigest('md5', '', raw_password))
             if is_correct:
                 # Convert the password to the new, more secure format.
                 self.set_password(raw_password)
