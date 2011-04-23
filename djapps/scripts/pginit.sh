@@ -14,5 +14,6 @@ else
     sudo -u postgres -i $pgdir/dropuser $dbname
     sudo -u postgres -i $pgdir/createuser $dbname -s
 fi
+echo "SERVER SOFTWARE HERE: $SERVER_SOFTWARE"
 python manage.py syncdb
 
