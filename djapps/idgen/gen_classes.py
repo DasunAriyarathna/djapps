@@ -43,15 +43,21 @@ class IDGeneratorSerial(IDGenerator):
         Calculates the next ID for a particular generator.
         This creates IDs serially.
         """
+        from django.db import DatabaseError, transaction
         num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
+        delta       = 0
         while True:
-            val = models.GeneratedID.objects.filter(generator = generator).count()
-            val = utils.value_to_string(val, generator.allowed_chars)
+            delta += 1
             try:
+                val = delta + models.GeneratedID.objects.filter(generator = generator).count()
+                val = utils.value_to_string(val, generator.allowed_chars)
                 save_id(generator, val)
                 return val
-            except:
-                print "Rand Value (%s) already exists. Trying again..." % val
+            except DatabaseError, e:
+                print "Error: ", dir(e), e.message
+                print "Serial ID Value (%s) already exists. Trying again..." % val
+                try: transaction.rollback()
+                except Exception, e: print "Rollback Error: ", e.message
 
 class IDGeneratorRandom(IDGenerator):
     @classmethod
@@ -66,8 +72,11 @@ class IDGeneratorRandom(IDGenerator):
             try:
                 save_id(generator, val)
                 return val
-            except:
-                print "Rand Value (%s) already exists. Trying again..." % val
+            except DatabaseError, e:
+                print "Error: ", dir(e), e.message
+                print "Rand ID Value (%s) already exists. Trying again..." % val
+                try: transaction.rollback()
+                except Exception, e: print "Rollback Error: ", e.message
 
 class IDGeneratorLFSR(IDGenerator):
     @classmethod
