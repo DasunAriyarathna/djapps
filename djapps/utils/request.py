@@ -1,33 +1,33 @@
 
 from djapps.utils import urls         as djurls
 
-def get_getvar(request, variable, default = "", converter = None):
+def get_getvar(request, variable, default = "", converter = None, **converter_args):
     if request.GET and variable in request.GET:
         if converter:
-            return converter(request.GET[variable])
+            return converter(request.GET[variable], **converter_args)
         else:
             return request.GET[variable]
     return default
 
 
-def get_postvar(request, variable, default = "", converter = None):
+def get_postvar(request, variable, default = "", converter = None, **converter_args):
     if request.POST and variable in request.POST:
         if converter:
-            return converter(request.POST[variable])
+            return converter(request.POST[variable], **converter_args)
         else:
             return request.POST[variable]
     return default
 
 
-def get_var(request, variable, default = "", converter = None):
+def get_var(request, variable, default = "", converter = None, **converter_args):
     if request.GET and variable in request.GET:
         if converter:
-            return converter(request.GET[variable])
+            return converter(request.GET[variable], **converter_args)
         else:
             return request.GET[variable]
     elif request.POST and variable in request.POST:
         if converter:
-            return converter(request.POST[variable])
+            return converter(request.POST[variable], **converter_args)
         else:
             return request.POST[variable]
     else:
