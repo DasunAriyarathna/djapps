@@ -164,16 +164,13 @@ def account_login(request,
     return {'form': {}, redirect_field_name: redirect_to, }, template_name
 
 @djdecos.format_response
-def decorated_account_login(request,
-                  template_name='djapps/auth/login.html',
-                  redirect_field_name=REDIRECT_FIELD_NAME,
-                  request_context = None):
+def decorated_account_login(request, **kwargs):
     """
     Essentially wraps the account_login function with a format_response
     decorator to return a HttpResponse object instead of raw data.
     To get only raw data use the account_login function.
     """
-    return account_login(request, template_name, redirect_field_name, request_context)
+    return account_login(request, **kwargs)
 
 @djdecos.format_response
 def normal_account_logout(request):
