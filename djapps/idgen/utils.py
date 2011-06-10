@@ -14,7 +14,7 @@ def value_to_string(unsigned_value, allowed_chars, max_length = -1):
         num_chars = len(allowed_chars)
         while unsigned_value > 0 and (max_length < 0 or length < max_length):
             length += 1
-            out += allowed_chars[unsigned_value % num_chars]
+            out = allowed_chars[unsigned_value % num_chars] + out
             unsigned_value = int(unsigned_value / num_chars)
         return out
 
