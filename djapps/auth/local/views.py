@@ -52,9 +52,7 @@ def account_register(request,
              register_timeout   = 2,
              form_context       = {}):
 
-    format = None
-    if settings.FORMAT_PARAM in request.GET:
-        format = request.GET[settings.FORMAT_PARAM]
+    format = request.GET.get(settings.FORMAT_PARAM, None)
 
     if request.method == 'GET':
         return api_result(0, {'context': form_context}), template_name
