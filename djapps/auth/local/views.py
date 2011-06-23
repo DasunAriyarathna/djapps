@@ -121,7 +121,7 @@ def account_login(request,
     # Light security check -- make sure redirect_to isn't garbage.
     if not redirect_to or ' ' in redirect_to:
         redirect_to = settings.LOGIN_REDIRECT_URL
-    if request.method == "POST":
+    if request.method == "POST" or request.GET.get("__method__", "") == "post":
         format = None
         if settings.FORMAT_PARAM in request.GET:
             format = request.GET[settings.FORMAT_PARAM]
