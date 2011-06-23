@@ -52,11 +52,11 @@ def account_register(request,
              register_timeout   = 2,
              form_context       = {}):
 
-    format = request.GET.get(settings.FORMAT_PARAM, None)
+    format = djrequest.get_var(request, settings.FORMAT_PARAM, "").strip().lower()
 
     if request.method == 'GET':
         return api_result(0, {'context': form_context}), template_name
-    elif request.method != 'POST':
+    elif request.method != 'POST' or request.GET.get("__method__", "") == "post":
         if format == "json":
             return api_result(-1, "Invalid request method"), template_name
         else:
@@ -74,9 +74,9 @@ def account_register(request,
     if 'UserRegClass' in form_context:
         UserRegClass = form_context['UserRegClass']
 
-    username    = post_data.get("username", "").strip().lower()
-    email       = post_data.get("email", "").strip().lower()
-    password    = post_data.get("password", "").strip()
+    username = djrequest.get_var(request, "username", "").strip().lower()
+    email = djrequest.get_var(request, "email", "").strip().lower()
+    password = djrequest.get_var(request, "password", "").strip().lower()
     if not email:
         return api_result(-1, "Email is mandatory")
 
@@ -122,12 +122,10 @@ def account_login(request,
     if not redirect_to or ' ' in redirect_to:
         redirect_to = settings.LOGIN_REDIRECT_URL
     if request.method == "POST" or request.GET.get("__method__", "") == "post":
-        format = None
-        if settings.FORMAT_PARAM in request.GET:
-            format = request.GET[settings.FORMAT_PARAM]
-
-        username = request.POST.get("username", "").strip().lower()
-        password = request.POST.get("password", "").strip()
+        format = djrequest.get_var(request, settings.FORMAT_PARAM, "").strip().lower()
+        username = djrequest.get_var(request, "username", "").strip().lower()
+        email = djrequest.get_var(request, "email", "").strip().lower()
+        password = djrequest.get_var(request, "password", "").strip().lower()
 
         login_user = None
         if username and password:
