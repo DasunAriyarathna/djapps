@@ -54,8 +54,7 @@ class IDGeneratorSerial(IDGenerator):
                 save_id(generator, val)
                 return val
             except DatabaseError, e:
-                print "Error: ", dir(e), e.message
-                print "Serial ID Value (%s) already exists. Trying again..." % val
+                print "Error: Serial ID Value (%s) already exists. Trying again..." % val
                 try: transaction.rollback()
                 except Exception, e: print "Rollback Error: ", e.message
 
@@ -73,8 +72,7 @@ class IDGeneratorRandom(IDGenerator):
                 save_id(generator, val)
                 return val
             except DatabaseError, e:
-                print "Error: ", dir(e), e.message
-                print "Rand ID Value (%s) already exists. Trying again..." % val
+                print "Error: Rand ID Value (%s) already exists. Trying again..." % val
                 try: transaction.rollback()
                 except Exception, e: print "Rollback Error: ", e.message
 

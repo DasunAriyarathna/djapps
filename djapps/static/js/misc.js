@@ -136,8 +136,11 @@ function createLightPanel(title, div, size)
                                               modal: true,
                                               visible: true});
     panel.setHeader(title);
-    panel.setBody(div);
+    if (!!div)
+    {
+        panel.setBody(div);
+        div.style.display = "block";
+    }
     panel.render(document.body);
-    div.style.display = "block";
     return panel;
 }
