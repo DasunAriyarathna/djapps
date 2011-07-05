@@ -73,6 +73,7 @@ class JQDateTimeWidget(widgets.SelectDateTimeWidget):
         date = data.get(self.date_field % name)
         if type(date) != datetime.datetime:
             input_formats = itertools.chain(get_format('DATE_INPUT_FORMATS'), get_format('DATETIME_INPUT_FORMATS'))
+            print "input formats: ", input_formats
             for input_format in input_formats:
                 # try all formats
                 try:
