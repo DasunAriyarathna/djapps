@@ -43,16 +43,20 @@ class IDGeneratorSerial(IDGenerator):
         Calculates the next ID for a particular generator.
         This creates IDs serially.
         """
-        from django.db import DatabaseError, transaction
+        from django.db import IntegrityError, DatabaseError, transaction
         num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
         delta       = 0
         while True:
             delta += 1
             try:
-                val = delta + models.GeneratedID.objects.filter(generator = generator).count()
+                val = 1 + models.GeneratedID.objects.filter(generator = generator).count()
                 val = utils.value_to_string(val, generator.allowed_chars)
                 save_id(generator, val)
                 return val
+            except IntegrityError, e:
+                print "Error: Serial ID Value (%s) already exists. Trying again..." % val
+                try: transaction.rollback()
+                except Exception, e: print "Rollback Error: ", e.message
             except DatabaseError, e:
                 print "Error: Serial ID Value (%s) already exists. Trying again..." % val
                 try: transaction.rollback()
@@ -65,12 +69,17 @@ class IDGeneratorRandom(IDGenerator):
         Calculates the next ID for a particular generator.
         This creates IDs at random and waits till there are no collissions.
         """
+        from django.db import IntegrityError, DatabaseError, transaction
         num_bits    = utils.get_num_bits(len(generator.allowed_chars), generator.key_length)
         while True:
             val = utils.value_to_string(random.randint(0, 2 ** num_bits), generator.allowed_chars)
             try:
                 save_id(generator, val)
                 return val
+            except IntegrityError, e:
+                print "Error: Rand ID Value (%s) already exists. Trying again..." % val
+                try: transaction.rollback()
+                except Exception, e: print "Rollback Error: ", e.message
             except DatabaseError, e:
                 print "Error: Rand ID Value (%s) already exists. Trying again..." % val
                 try: transaction.rollback()
