@@ -69,12 +69,14 @@ class JQDateTimeWidget(widgets.SelectDateTimeWidget):
         """
         This parses the actual date from the data dictionary.
         """
-        print "Date_field, Date: ", self.date_field % name, data.get(self.date_field % name)
         date = data.get(self.date_field % name)
+        if not date:
+            date = datetime.datetime.now()
+        print "Date_field: %s, Date: %s" % (self.date_field % name, str(date))
         if type(date) != datetime.datetime:
             input_formats = itertools.chain(get_format('DATE_INPUT_FORMATS'), get_format('DATETIME_INPUT_FORMATS'))
-            print "input formats: ", input_formats
             for input_format in input_formats:
+                print "input formats: ", input_format
                 # try all formats
                 try:
                     date = datetime.datetime.strptime(date, input_format)
