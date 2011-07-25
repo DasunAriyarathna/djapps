@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.cache import never_cache
 from djapps.dynamo.helpers import get_or_create_object, get_first_object, save_object, get_object_id
 from djapps.utils import urls as djurls
+from djapps.utils import codes
 from djapps.auth import REDIRECT_FIELD_NAME
 
 from models import *
@@ -55,10 +56,10 @@ def account_register(request,
     format = djrequest.get_var(request, settings.FORMAT_PARAM, "").strip().lower()
 
     if request.method == 'GET':
-        return api_result(0, {'context': form_context}), template_name
+        return api_result(codes.CODE_OK, {'context': form_context}), template_name
     elif request.method != 'POST' or request.GET.get("__method__", "") == "post":
         if format == "json":
-            return api_result(-1, "Invalid request method"), template_name
+            return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid request method"), template_name
         else:
             return HttpResponse("Invalid request type: " + request.method)
 
@@ -78,7 +79,7 @@ def account_register(request,
     email = djrequest.get_var(request, "email", "").strip().lower()
     password = djrequest.get_var(request, "password", "").strip().lower()
     if not email:
-        return api_result(-1, "Email is mandatory")
+        return api_result(codes.CODE_GENERAL_ERROR, "Email is mandatory")
 
     # 
     # Form is now validated
@@ -99,13 +100,13 @@ def account_register(request,
 
     if new_created:
         if format == "json":
-            return api_result(0, {'id': str(get_object_id(new_user)),
+            return api_result(codes.CODE_OK, {'id': str(get_object_id(new_user)),
                                   'username': new_user.username})
         else:
             return HttpResponseRedirect(djurls.get_login_url())
     else:
         if format == "json":
-            return api_result(-1, "User already exists.  Please enter a new username.")
+            return api_result(codes.CODE_USERNAME_TAKEN, "User already exists.  Please enter a new username.")
         else:
             return HttpResponse("User already exists.  Please enter a new username")
 
@@ -131,9 +132,9 @@ def account_login(request,
         if username and password:
             login_user = api.authenticate(request, username, password)
             if login_user is None:
-                return api_result(-1, "Authentication failed.")
+                return api_result(codes.CODE_AUTH_FAILED, "Authentication failed.")
             elif not login_user.is_active:
-                return api_result(-1, "Account is inactive.")
+                return api_result(codes.CODE_ACCOUNT_INACTIVE, "Account is inactive.")
             else:
                 api.login(request, login_user)
                 if request.session.test_cookie_worked():
@@ -141,12 +142,12 @@ def account_login(request,
 
         if format == "json":
             if not login_user:
-                return api_result(-1, "Authentication failed.")
+                return api_result(codes.CODE_AUTH_FAILED, "Authentication failed.")
             elif not login_user.is_active:
-                return api_result(-1, "Email confirmation not yet recieved.")
+                return api_result(codes.CODE_ACCOUNT_UNCONFIRMED, "Email confirmation not yet recieved.")
             else:
                 # user is valid:
-                return api_result(0, {'id': str(get_object_id(login_user)),
+                return api_result(codes.CODE_OK, {'id': str(get_object_id(login_user)),
                                       'username': login_user.username})
         else:
             if not login_user:
@@ -238,7 +239,7 @@ def account_settings(request,
         return extra_context, template_name
     elif request.method != 'POST':
         if format == "json":
-            return api_result(-1, "Invalid request method")
+            return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid request method")
         else:
             return HttpResponse("Invalid request type: " + request.method)
 

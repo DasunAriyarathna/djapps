@@ -4,14 +4,11 @@ import sys
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 
-from . import api_result
+from . import api_result, codes
 import json as djjson
 
 JSON_CONTENT_TYPE = "application/json"
 # JSON_CONTENT_TYPE = "text/html"
-
-CODE_UNAUTHENTICATED    =   -2
-CODE_NOTALLOWEDMETHOD   =   -3
 
 def format_response(func):
     """ Takes a result and converts to an appropriate response object.
@@ -63,7 +60,7 @@ def ensure_request_type(*methods):
     def ensure_request_type_decorator(func):
         def ensure_request_type_method(request, *args, **kws):
             if methods and request.method not in methods:
-                return api_result(CODE_NOTALLOWEDMETHOD, "Invalid method type: '%s'" % method)
+                return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid method type: '%s'" % method)
             return func(request, *args, **kws)
 
         return ensure_request_type_method
@@ -85,7 +82,7 @@ def send_unauthenticated_response(request, *args, **kwds):
                                   settings.FORMAT_PARAM,
                                   djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
     if format == "json":
-        return api_result(CODE_UNAUTHENTICATED, "Unable to authenticate user.")
+        return api_result(codes.CODE_UNAUTHENTICATED, "Unable to authenticate user.")
     else:
         return HttpResponseRedirect(djurls.get_login_url(request.path))
     
