@@ -43,10 +43,6 @@ from    djapps.utils                import api_result
 @djdecos.format_response
 def account_register(request,
              template_name      = 'djapps/auth/register.html', 
-             email_host         = 'localhost',
-             email_port         = 25,
-             email_username     = "",
-             email_password     = "",
              email_template     = "djapps/auth/register-email.txt",
              email_from         = "accounts@thisserver.com",
              email_subject      = "Your Account Confirmation",
@@ -90,9 +86,8 @@ def account_register(request,
     if 'last_name' in post_data: last_name = post_data['last_name']
     if 'nick_name' in post_data: nick_name = post_data['nick_name']
     new_user, reg_info, new_created = api.register_user(email, email, password, first_name, last_name, nick_name,
-                                                        is_active, request, register_timeout, form_context, 
-                                                        UserClass, UserRegClass, email_template, email_host, 
-                                                        email_port, email_username, email_password,  email_from, 
+                                                        is_active, request, register_timeout, form_context,
+                                                        UserClass, UserRegClass, email_template,  email_from, 
                                                         email_subject)
     # batch save the registration and user objects
     # if reg_info: save_object(new_user, reg_info)
