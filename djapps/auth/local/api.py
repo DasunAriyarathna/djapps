@@ -65,7 +65,7 @@ def register_user(username, email, password,
                 msgbody         = emailtemplate.render(email_context)
 
                 djmail.send_mail(new_user.email, email_from, email_subject,
-                                msgbody, email_host, email_port, email_username,
-                                email_password)
+                                msgbody, settings.email_host, settings.email_port,
+                                settings.email_username, settings.email_password)
     return new_user, reg_info, newcreated
 
