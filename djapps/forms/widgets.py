@@ -2,9 +2,7 @@
 Extra HTML Widget classes
 """
 
-import time
-import datetime
-import re
+import time, itertools, datetime, re
 
 from django.forms.widgets import Widget, Select
 from django.utils import datetime_safe
@@ -31,6 +29,9 @@ class SelectDateTimeWidget(Widget):
     hour_field = '%s_hour'
     minute_field = '%s_minute'
     second_field = '%s_second'
+
+    date_field = '%s'
+    time_field = '%s'
 
     def __init__(self,
                  attrs=None, years=None, required=True,
@@ -162,18 +163,45 @@ class SelectDateTimeWidget(Widget):
         """
         This parses the actual date from the data dictionary.
         """
-        y = data.get(self.year_field % name)
-        m = data.get(self.month_field % name)
-        d = data.get(self.day_field % name)
+        # if the date field does not have it then check for the individual
+        # year, month, day fields for values
+
+        # first check if the date_field has the date in it:
+        date = data.get(self.date_field % name)
+        if date and type(date) != datetime.datetime:
+            input_formats = itertools.chain(get_format('DATE_INPUT_FORMATS'), get_format('DATETIME_INPUT_FORMATS'))
+            for input_format in input_formats:
+                # try all formats
+                try:
+                    date = datetime.datetime.strptime(date, input_format)
+                    y,m,d = date.year, date.month, date.day
+                    break
+                except ValueError, ve:
+                    pass
+        y = data.get(self.year_field % name, y)
+        m = data.get(self.month_field % name, m)
+        d = data.get(self.day_field % name, d)
         return y,m,d
 
     def parse_time_from_datadict(self, data, files, name):
         """
         This parses the actual time from the data dictionary.
         """
-        hr = data.get(self.hour_field % name, "0")
-        min = data.get(self.minute_field % name, "0")
-        sec = data.get(self.second_field % name, "0")
+        # see if the time_field overrides the hr/min/sec fields
+        hr = min = sec = 0
+        date = data.get(self.time_field % name)
+        if date and type(date) != datetime.datetime:
+            for input_format in get_format('DATETIME_INPUT_FORMATS'):
+                # try all formats
+                try:
+                    date = datetime.datetime.strptime(date, input_format)
+                    hr,min,sec = date.hour, date.minute, date.second
+                    break
+                except ValueError, ve:
+                    pass
+        hr = data.get(self.hour_field % name, hr)
+        min = data.get(self.minute_field % name, min)
+        sec = data.get(self.second_field % name, sec)
         return hr,min,sec
 
     def create_select(self, name, field, val, choices):
