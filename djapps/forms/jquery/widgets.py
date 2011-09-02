@@ -20,7 +20,6 @@ __all__ = ('JQDateWidget',)
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?) (\d\d?):(\d\d?):(\d\d?)$')
 
 class JQDateTimeWidget(widgets.SelectDateTimeWidget):
-    date_field = '%s'
     def render_date(self, name, year_val, month_val, day_val, format):
         """
         Overridden to render date as a JQ date plugin.
@@ -64,22 +63,4 @@ class JQDateTimeWidget(widgets.SelectDateTimeWidget):
                 });
             </script>
             """ % {'name': name, 'id': field_id, 'format': date_format, 'value': date_value}
-
-    def parse_date_from_datadict(self, data, files, name):
-        """
-        This parses the actual date from the data dictionary.
-        """
-        date = data.get(self.date_field % name)
-        if not date:
-            date = datetime.datetime.now()
-        if type(date) != datetime.datetime:
-            input_formats = itertools.chain(get_format('DATE_INPUT_FORMATS'), get_format('DATETIME_INPUT_FORMATS'))
-            for input_format in input_formats:
-                # try all formats
-                try:
-                    date = datetime.datetime.strptime(date, input_format)
-                    break
-                except ValueError, ve:
-                    pass
-        return date.year, date.month, date.day
 
