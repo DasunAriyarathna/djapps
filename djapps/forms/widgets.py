@@ -168,6 +168,8 @@ class SelectDateTimeWidget(Widget):
 
         # first check if the date_field has the date in it:
         date = data.get(self.date_field % name)
+        now = datetime.datetime.utcnow()
+        y,m,d = now.year, now.month, now.day
         if date and type(date) != datetime.datetime:
             input_formats = itertools.chain(get_format('DATE_INPUT_FORMATS'), get_format('DATETIME_INPUT_FORMATS'))
             for input_format in input_formats:
