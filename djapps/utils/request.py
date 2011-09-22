@@ -1,5 +1,19 @@
 
 from djapps.utils import urls         as djurls
+import djapps.utils as djutils
+
+def dict_from_request(request, get_has_priority = True):
+    if get_has_priority:
+        if request.POST:
+            filters = dict(request.POST.items())
+        else:
+            filters = {}
+        filters.update(dict(request.GET.items()))
+    else:
+        filters = dict(request.GET.items())
+        if request.POST:
+            filters.update(dict(request.POST.items()))
+    return djutils.to_str_keys(filters)
 
 def get_getvar(request, variable, default = "", converter = None, **converter_args):
     if request.GET and variable in request.GET:
