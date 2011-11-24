@@ -1,5 +1,6 @@
 
 import random, sys, models, constants, math, utils, gen_classes
+from django.core.exceptions import ValidationError
 
 def get_id_generator(name):
     """
@@ -45,6 +46,15 @@ def get_or_create_id_generator(name, *args, **kwargs):
         print "ID Generator (%s) already exists." % name
         return get_id_generator(name)
 
+def mark_id_as_used(generator_or_name, id):
+    """
+    Marks a particular ID as having been used.
+    """
+    generator = generator_or_name
+    if type(generator) in (str, unicode):
+        generator = models.IDGenerator.objects.get(pk = generator)
+    return gen_classes.mark_id_as_used(generator, id)
+
 def get_next_id(generator_or_name):
     """
     Gets the next ID using the generator.
@@ -53,4 +63,23 @@ def get_next_id(generator_or_name):
     if type(generator) in (str, unicode):
         generator = models.IDGenerator.objects.get(pk = generator)
     return eval(generator.gen_type).get_next_id(generator)
+
+def is_id_used(generator_or_name, id):
+    """
+    Tells if a particular ID has already been used for a given generator.
+    """
+    generator = generator_or_name
+    if type(generator) in (str, unicode):
+        generator = models.IDGenerator.objects.get(pk = generator)
+    return gen_classes.is_id_used(generator, id)
+
+def validate_id(generator_or_name, id):
+    """
+    Tells if an id is valid for a particular class.
+    """
+    generator = generator_or_name
+    if type(generator) in (str, unicode):
+        generator = models.IDGenerator.objects.get(pk = generator)
+    if len(id) > generator.key_length or any(map(lambda x:x not in generator.allowed_chars, id)):
+        raise ValidationError("Characters in '%s' must be less then %d characters in length and only made of '%s'" % (id, generator.key_length, generator.allowed_chars))
 
