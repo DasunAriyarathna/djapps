@@ -1,0 +1,11 @@
+
+# A few server codes
+
+CODE_OK                 =   0
+CODE_GENERAL_ERROR      =   -1
+CODE_UNAUTHENTICATED    =   -2
+CODE_INVALID_USERNAME   =   -3
+CODE_NOTALLOWEDMETHOD   =   -4
+CODE_USERNAME_TAKEN     =   -5
+CODE_AUTH_FAILED        =   -6
+CODE_ACCOUNT_INACTIVE   =   -7
