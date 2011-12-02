@@ -73,7 +73,7 @@ def account_register(request,
 
     username = djrequest.get_var(request, "username", "").strip().lower()
     email = djrequest.get_var(request, "email", "").strip().lower()
-    password = djrequest.get_var(request, "password", "").strip().lower()
+    password = djrequest.get_var(request, "password", "").strip()
     if not email:
         return api_result(codes.CODE_GENERAL_ERROR, "Email is mandatory")
 
@@ -121,7 +121,7 @@ def account_login(request,
         format = djrequest.get_var(request, settings.FORMAT_PARAM, "").strip().lower()
         username = djrequest.get_var(request, "username", "").strip().lower()
         email = djrequest.get_var(request, "email", "").strip().lower()
-        password = djrequest.get_var(request, "password", "").strip().lower()
+        password = djrequest.get_var(request, "password", "").strip()
 
         login_user = None
         if username and password:
