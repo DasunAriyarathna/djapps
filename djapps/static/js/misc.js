@@ -1,6 +1,9 @@
 
 // String.prototype.trim = function() { return this.replace(/^\s+|\s+$/, ''); };
 String.prototype.trim = function() { return this.replace(/^\s*/, "").replace(/\s*$/, ""); };
+String.prototype.startsWith = function(str) {return (this.match("^"+str)==str)} 
+String.prototype.endsWith = function(str) {return (this.match(str+"$")==str)}
+
 
 var EmailFilter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 
