@@ -1,8 +1,9 @@
 
 from django.db import models
 import datetime, constants
+import caching.base
 
-class IDGenerator(models.Model):
+class IDGenerator(caching.base.CachingMixin, models.Model):
     """
     Generates unique IDs over a particular domain.
     """
@@ -25,11 +26,12 @@ class IDGenerator(models.Model):
     class Meta:
         verbose_name = "ID Generator"
 
-class GeneratedID(models.Model):
+class GeneratedID(caching.base.CachingMixin, models.Model):
     """
     Stores a generated ID.
     This provides an easy way to test out our generator.
     """
+    objects     = caching.base.CachingManager()
     generator   = models.ForeignKey(IDGenerator)
     gen_id      = models.CharField(max_length = 100)
 
@@ -38,11 +40,12 @@ class GeneratedID(models.Model):
         ordering = ("generator","gen_id")
         verbose_name = "Generated ID"
 
-class IDGeneratorSerial(models.Model):
+class IDGeneratorSerial(caching.base.CachingMixin, models.Model):
     """
     An ID generator that simply generates serial IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
+    objects     = caching.base.CachingManager()
     generator   = models.ForeignKey(IDGenerator)
 
     def __str__(self):
@@ -51,11 +54,12 @@ class IDGeneratorSerial(models.Model):
     class Meta:
         verbose_name = "Serial ID Generator"
 
-class IDGeneratorRandom(models.Model):
+class IDGeneratorRandom(caching.base.CachingMixin, models.Model):
     """
     An ID generator that simply generates random IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
+    objects     = caching.base.CachingManager()
     generator   = models.ForeignKey(IDGenerator)
 
     def __str__(self):
@@ -64,11 +68,12 @@ class IDGeneratorRandom(models.Model):
     class Meta:
         verbose_name = "Random ID Generator"
 
-class IDGeneratorLFSR(models.Model):
+class IDGeneratorLFSR(caching.base.CachingMixin, models.Model):
     """
     An ID generator that simply generates random IDs and checks the DB for
     collissions.  Not optimal but good for now.
     """
+    objects     = caching.base.CachingManager()
     generator   = models.ForeignKey(IDGenerator)
 
     def __str__(self):
