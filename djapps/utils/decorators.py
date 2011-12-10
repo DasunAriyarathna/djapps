@@ -10,6 +10,22 @@ import json as djjson
 JSON_CONTENT_TYPE = "application/json"
 # JSON_CONTENT_TYPE = "text/html"
 
+def show_queries(func):
+    """
+    A decorator that prints out the queries used by a function and the
+    times taken for them.
+    """
+    from django.db import connection
+    def show_queries(*args, **kwargs):
+        result = func(*args, **kwargs)
+        print >> sys.stderr, "Used Queries: "
+        for query in connection.queries:
+            print "=" * 80
+            print "    Time: ", query['time']
+            print "    Sql: ", query['sql']
+        return result
+    return show_queries
+    
 def format_response(func):
     """ Takes a result and converts to an appropriate response object.
         A function that uses this as a decorator, must return one of the
