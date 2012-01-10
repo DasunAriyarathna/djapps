@@ -18,7 +18,8 @@ def show_queries(func):
     from django.db import connection
     def show_queries(*args, **kwargs):
         result = func(*args, **kwargs)
-        print >> sys.stderr, "Used Queries: "
+        print >> sys.stderr, "Method: ", func
+        print >> sys.stderr, "Queries: "
         for query in connection.queries:
             print "=" * 80
             print "    Time: ", query['time']
