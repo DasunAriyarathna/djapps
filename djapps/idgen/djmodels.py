@@ -12,7 +12,7 @@ class IDGenerator(models.Model):
 
     # Type of generator to be used.
     # different types can have different computational modes
-    gen_type        =   models.CharField(max_length = 256, default = "lfsr") 
+    gen_type        =   models.CharField(max_length = 256, default = "lfsr")
 
     # characters allowed in each key
     # cannot have more than 256 characters.
