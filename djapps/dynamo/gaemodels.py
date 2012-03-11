@@ -1,7 +1,7 @@
 
 from google.appengine.ext import db
 from google.appengine.api.users import User
-import datetime, settings
+import datetime
 from djapps.gaeutils.sessions import Session
 
 class Unique(db.Model):
@@ -20,33 +20,33 @@ class Unique(db.Model):
         def __init__(self, scope, value):
             super(UniqueConstraintViolation, self).__init__("Value '%s' is not unique within scope '%s'." % (value, scope))
 
-# 
+#
 # Holds info about a counter shard
 #
 # TODO - put in things like a load factor so if we are reaching X counters
 # per shard then add more shards
 #
 class DJCounterConfig(db.Model):
-    # 
+    #
     # name of the countable
     #
     name        = db.StringProperty(required = True)
 
-    # 
+    #
     # Number of shards of this type
     #
     num_shards  = db.IntegerProperty(required = True, default = 50)
 
-# 
+#
 # A table to hold counters for object classes
 #
 class DJCounterShard(db.Model):
-    # 
+    #
     # name of the countable
     #
     name        = db.StringProperty()
 
-    # 
+    #
     # Number of items of this type
     #
     count       = db.IntegerProperty(default = 0)

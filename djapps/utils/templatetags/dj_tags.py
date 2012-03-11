@@ -2,7 +2,9 @@ from django import template
 from django.template import Template, Node, NodeList, resolve_variable, Context
 from django.template import TemplateSyntaxError, BLOCK_TAG_START, BLOCK_TAG_END, VARIABLE_TAG_START, VARIABLE_TAG_END, SINGLE_BRACE_START, SINGLE_BRACE_END, COMMENT_TAG_START, COMMENT_TAG_END
 
-import settings, sys, os, logging
+from django.conf import settings
+
+import sys, os, logging
 
 register = template.Library()
 
@@ -21,7 +23,7 @@ def djregisterlink(value, arg):
     from djapps.utils import urls   as djurls
     return djurls.get_register_url(arg)
 
-# 
+#
 # The tag for objid.  Simpler way to print the id of an object regardless
 # of GAE or django.
 #
@@ -40,7 +42,7 @@ def do_objid(parser, token):
         raise template.TemplateSyntaxError(msg)
     return DJObjIdNode(format_string)
 
-# 
+#
 # The node processor for "objid" nodes
 #
 class DJObjIdNode(template.Node):
@@ -54,7 +56,7 @@ class DJObjIdNode(template.Node):
         from djapps.dynamo import helpers
         return helpers.get_object_id(theObject)
 
-# 
+#
 # The tag for djflash.  ie for including flash content on a page.  Instead
 # of having to muck about with all that browser dependencies.
 #
@@ -103,7 +105,7 @@ def do_djflash(parser, token):
         if param not in arg_match:
             raise template.TemplateSyntaxError("Invalid parameter: %s.  Valid parameters are %s." % (param, ", ".join(arg_match.keys())))
 
-        # 
+        #
         # strip any quotes off
         #
         if value.endswith('"'):
@@ -131,8 +133,8 @@ def do_djflash(parser, token):
 
     return DJFlashNode(flashSrc, arguments)
 
-# 
-# The node processor for "djflash" nodes, which add 
+#
+# The node processor for "djflash" nodes, which add
 # flash objects to the page.
 #
 class DJFlashNode(template.Node):
