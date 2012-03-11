@@ -6,8 +6,8 @@ import datetime, os, sys, logging
 
 import djmodels as dnmod
 
-# 
-# A quick transaction enabled function to 
+#
+# A quick transaction enabled function to
 # save a bunch of db objects.
 #
 @transaction.commit_on_success
@@ -22,7 +22,7 @@ def save_objects(*objects):
     for obj in to_save:
         obj.save()
 
-# 
+#
 # Saves a datastore object
 #
 def save_object(obj):
@@ -49,40 +49,40 @@ def create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
 def get_or_create_object(obj_class, save = True, parent = None, id_val = None, **kwds):
     return obj_class.objects.get_or_create(**kwds)
 
-# 
+#
 # Get a list of all objects of a certain class
 #
 def get_all_objects(obj_class):
     return obj_class.objects.all()
 
-# 
+#
 # Delete a set of objects
 #
 def delete_objects(objs):
     if objs: objs.delete()
 
-# 
+#
 # Delete all objects in a class
 #
 def delete_all_objects(obj_class):
-    print >> sys.stderr, "Deleting all objects of class ", obj_class
+    print >> sys.stderr, "Deleting all dj objects of class ", obj_class
     obj_class.objects.all().delete()
 
-# 
+#
 # Gets the object with a the given keywords
 #
 def get_objects(obj_class, **kwds):
     try: return obj_class.objects.filter(**kwds)
     except obj_class.DoesNotExist: return None
 
-# 
+#
 # Gets the count of objects with a the given keywords
 #
 def get_object_count(obj_class, **kwds):
     try: return obj_class.objects.filter(**kwds).count()
     except obj_class.DoesNotExist: return 0
 
-# 
+#
 # Returns the ID of a db object
 #
 def get_object_id(obj):
