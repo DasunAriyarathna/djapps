@@ -21,9 +21,9 @@ def show_queries(func):
         print >> sys.stderr, "Method: ", func
         print >> sys.stderr, "Queries: "
         for query in connection.queries:
-            print "=" * 80
-            print "    Time: ", query['time']
-            print "    Sql: ", query['sql']
+            print >> sys.stderr, "=" * 80
+            print >> sys.stderr, "    Time: ", query['time']
+            print >> sys.stderr, "    Sql: ", query['sql']
         return result
     return show_queries
     
