@@ -1,7 +1,8 @@
 
+from django.conf import settings
 import sys, logging, md5
 from datetime import datetime
-import settings
+
 
 try:
     from threading import local
@@ -38,7 +39,7 @@ class Authenticator(object):
         """ Called to cleanup any cookies we may have created. """
         pass
 
-# 
+#
 # Tries to authenticate a request by local site and returns a user alias
 #
 class AuthLocalSite(Authenticator):
@@ -63,4 +64,4 @@ class AuthLocalSite(Authenticator):
         else:
             from django.contrib.auth import logout
             logout(request)
-        
+

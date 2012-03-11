@@ -1,13 +1,13 @@
 
-import datetime, settings, logging, sys
+import datetime, logging, sys
 from google.appengine.ext import db
 from google.appengine.api.users import User
 from djapps.gaeutils.sessions import Session
 from google.appengine.api.datastore_errors import Timeout
 import gaemodels as dnmod
 
-# 
-# A quick transaction enabled function to 
+#
+# A quick transaction enabled function to
 # save a bunch of db objects.
 #
 # TODO : transactions
@@ -29,7 +29,7 @@ def save_objects(*objects):
     else:
         raise db.Timeout()
 
-# 
+#
 # Saves a datastore object
 #
 def save_object(obj):
@@ -74,13 +74,13 @@ def get_or_create_object(obj_class, save = True, parent = None, id_val = None, *
             obj.put()
         return obj, True
 
-# 
+#
 # Get all objects of a given class
 #
 def get_all_objects(obj_class):
     return obj_class.all()
 
-# 
+#
 # Delete a set of objects
 #
 def delete_objects(objs):
@@ -116,7 +116,7 @@ def delete_all_objects(obj_class, num_del = 300, **filters):
                     logging.error("Timeout error - continuing %d..." % count)
                     count += 1
 
-# 
+#
 # Returns objects with given attribs
 #
 def get_objects(obj_class, **kwds):
@@ -125,7 +125,7 @@ def get_objects(obj_class, **kwds):
         query.filter("%s = " % kwd, kwds[kwd])
     return query.fetch(query.count())
 
-# 
+#
 # Gets the count of objects with a the given keywords
 #
 def get_object_count(obj_class, **kwds):
@@ -181,7 +181,7 @@ def delete_counter(name):
 def increment_counter(name, incr = 1):
     config = dnmod.DJCounterConfig.get_or_insert(name, name = name)
     # TODO:
-    # call increase_shards if counters/shard 
+    # call increase_shards if counters/shard
     # has reached a certain threshold
     def txn():
         import random

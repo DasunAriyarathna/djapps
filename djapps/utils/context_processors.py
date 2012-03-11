@@ -1,5 +1,7 @@
+
+from django.conf import settings
 from djapps.utils import urls         as djurls
-import settings, sys
+import sys
 
 def site_urls(request):
     full_path   = request.get_full_path()
@@ -18,7 +20,7 @@ def site_urls(request):
     return out
 
 def gae_local_auth(request):
-    # drop in replacement for django auth context_processes 
+    # drop in replacement for django auth context_processes
     # for use with gae
     if hasattr(request, 'local_user'):
         user = request.local_user
