@@ -1,5 +1,6 @@
 
 import random, sys, models, constants, math, utils, gen_classes
+from django import db as djangodb
 from django.core.exceptions import ValidationError
 
 def get_id_generator(name):
@@ -42,7 +43,7 @@ def get_or_create_id_generator(name, *args, **kwargs):
     """
     try:
         return create_id_generator(name, *args, **kwargs)
-    except django.db.DatabaseError, ie:
+    except djangodb.DatabaseError, ie:
         print "ID Generator (%s) already exists." % name
         return get_id_generator(name)
 
