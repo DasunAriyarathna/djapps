@@ -45,7 +45,7 @@ class StringIDField(models.CharField):
     """
     description = _("A field that can create random IDs using an id generator.")
 
-    def __init__(self, id_genfunc, key_length = 8, *args, **kwargs):
+    def __init__(self, id_genfunc = "default", key_length = 8, *args, **kwargs):
         assert id_genfunc != None, "%ss must have a valid id_genfunc field value" % self.__class__.__name__
         assert key_length and key_length > 0, "%ss must have a positive key_length" % self.__class__.__name__
         self.id_genfunc = id_genfunc 
