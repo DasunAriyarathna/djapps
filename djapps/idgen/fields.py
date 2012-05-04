@@ -45,10 +45,10 @@ class StringIDField(models.CharField):
     """
     description = _("A field that can create random IDs using an id generator.")
 
-    def __init__(self, idgen, key_length, *args, **kwargs):
-        assert idgen != None, "%ss must have a valid idgen field value" % self.__class__.__name__
+    def __init__(self, id_genfunc, key_length = 8, *args, **kwargs):
+        assert id_genfunc != None, "%ss must have a valid id_genfunc field value" % self.__class__.__name__
         assert key_length and key_length > 0, "%ss must have a positive key_length" % self.__class__.__name__
-        self.id_genfunc = idgen
+        self.id_genfunc = id_genfunc 
         self.id_generator = None
         self.key_length = key_length
         self.initialised = False
@@ -59,6 +59,7 @@ class StringIDField(models.CharField):
         """
         Returns field's value just before saving.
         """
+        print "Pre Save: Add, Model_Instance: ", add, model_instance 
         if add: # new instance so create a new ID value
             # if the idgen is a string then we can use it as is
             value = getattr(model_instance, self.attname)
@@ -95,8 +96,16 @@ try:
     # For a normal StringIDField, the add_rendered_field attribute is
     # always True, which means no_rendered_field arg will always be
     # True in a frozen StringIDField, which is what we want.
-    add_introspection_rules(rules=[((StringIDField,), [], {})],
-                            patterns=['djapps\.idgen\.fields\.'])
+    add_introspection_rules([
+        (
+            [StringIDField],    # classes these apply to
+            [],                 # Positional args (not used)
+            {                   # KW args
+                "key_length": ["key_length", {'default': 8}],
+                "id_genfunc": ["id_genfunc", {'default': "default"}],
+            },
+        ),
+    ], ['djapps\.idgen\.fields\.'])
 except ImportError:
     pass
 
