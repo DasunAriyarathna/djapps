@@ -1,6 +1,7 @@
 
 import datetime, __builtin__
 from django import forms as djangoforms
+from django.db import models as djangomodels
 from django.utils import simplejson
 from django.utils.simplejson import decoder
 
@@ -14,7 +15,10 @@ class OurJsonEncoder(simplejson.JSONEncoder):
             if hasattr(o, "instance"):
                 out["instance"] = json_encode(getattr(o, "instance"))
             return out
-        # elif type(o) is __builtin__.generator: return [super(OurJsonEncoder, self).default(val) for val in o]
+        elif isinstance(o, djangomodels.query.QuerySet):
+            return [self.default(v) for v in o]
+        else:
+            print "Unknown type: ", type(o)
         return super(OurJsonEncoder, self).default(o)
 
 def json_encode(data):
