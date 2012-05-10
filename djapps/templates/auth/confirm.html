@@ -1,0 +1,54 @@
+
+<html>
+<head>
+<title>
+{% if expired %}
+Account Expired
+{% else %}
+Registration Confirmed
+{% endif %}
+</head>
+<body>
+
+{% if expired %}
+
+<center><h3>Account Expired</center>
+Your account registration has timed out.  Please register againand confirm
+your activation within the time limit.  We apologise for the inconvinience caused.
+
+<p>
+Thank you and hope to see you soon.
+
+{% else %}
+
+{% if has_account %}
+<center><h3>Account Already Exists</center>
+
+Account Name: {{requser}}
+
+{% else %} 
+
+{% if confirmed %}
+<center><h3>Registration Confirmed</center>
+Congratulation.  Your account registration was successfully confirmed.
+Please <a href={{context.href_uri.login}}>Login</a> to begin using your account.  
+
+<p>
+Thank you.  We are excited to be working with you.
+
+{% else %}
+
+<center><h3>Registration Failed</center>
+
+<p>
+Sorry your registration failed.  Please <a href={{context.href_uri.register}}>register</a> again.
+
+{% endif %}
+
+{% endif %}
+
+{% endif %}
+
+</body>
+</html>
+
