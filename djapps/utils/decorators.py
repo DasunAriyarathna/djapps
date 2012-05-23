@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from . import api_result, codes
 import json as djjson
 
+TEXT_CONTENT_TYPE = "text/text"
+HTML_CONTENT_TYPE = "text/html"
 JSON_CONTENT_TYPE = "application/json"
 # JSON_CONTENT_TYPE = "text/html"
 
@@ -47,29 +49,33 @@ def format_response(func):
         result  = func(request, *args, **kwargs)
 
         if result is not None:
-            if isinstance(result, HttpResponse):
-                return result
-            elif isinstance(result, Http404):
+            if isinstance(result, Http404):
                 raise result
+
+            import request as djrequest
+            content_type = djrequest.get_getvar(request, "content_type", None)
+            if isinstance(result, HttpResponse):
+                response = result
             elif type(result) is tuple:
                 import request as djrequest
                 from django.conf import settings
-                content_type = djrequest.get_getvar(request, "content_type", JSON_CONTENT_TYPE)
                 format = djrequest.get_getvar(request,
                                               settings.FORMAT_PARAM,
                                               djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
                 if format == "json" or len(result) < 2:
-                    response = HttpResponse(djjson.json_encode(result[0]), content_type = content_type)
-                    response["Access-Control-Allow-Origin"] = "*"
-                    return response
+                    response = HttpResponse(djjson.json_encode(result[0]), content_type = JSON_CONTENT_TYPE)
+                    # response["Access-Control-Allow-Origin"] = "*"
+                    # return response
                 else:
                     from django.template import RequestContext
                     context = RequestContext(request)
-                    return render_to_response(result[1], result[0], context)
-            import request as djrequest
-            content_type = djrequest.get_getvar(request, "content_type", JSON_CONTENT_TYPE)
-            response = HttpResponse(djjson.json_encode(result), content_type = content_type)
+                    response = render_to_response(result[1], result[0], context)
+            else:
+                # else treat as JSON
+                response = HttpResponse(djjson.json_encode(result), content_type = JSON_CONTENT_TYPE)
             response["Access-Control-Allow-Origin"] = "*"
+            if content_type:
+                response["Content-Type"] = content_type
             return response
     return format_response_method
 
