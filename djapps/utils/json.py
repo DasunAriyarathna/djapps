@@ -10,6 +10,9 @@ class OurJsonEncoder(simplejson.JSONEncoder):
         if type(o) is datetime.datetime: return str(o)
         elif hasattr(o, "to_json"): return o.to_json()
         elif hasattr(o, "toJson"): return o.toJson()
+        elif isinstance(o, Exception):
+            out = {'args': json_encode(o.args), 'message': json_encode(o.message)}
+            return out
         elif isinstance(o, djangoforms.BaseForm):
             out = {}
             if hasattr(o, "instance"):
