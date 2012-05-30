@@ -11,12 +11,11 @@ class OurJsonEncoder(simplejson.JSONEncoder):
         elif hasattr(o, "to_json"): return o.to_json()
         elif hasattr(o, "toJson"): return o.toJson()
         elif isinstance(o, Exception):
-            out = {'args': json_encode(o.args), 'message': json_encode(o.message)}
-            return out
+            return {'args': o.args, 'message': o.message}
         elif isinstance(o, djangoforms.BaseForm):
             out = {}
             if hasattr(o, "instance"):
-                out["instance"] = json_encode(getattr(o, "instance"))
+                out["instance"] = getattr(o, "instance")
             return out
         elif isinstance(o, djangomodels.query.QuerySet):
             return [self.default(v) for v in o]
