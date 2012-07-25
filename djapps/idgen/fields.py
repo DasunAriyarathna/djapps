@@ -28,8 +28,8 @@ class StringIDFormField(djfields.CharField):
             value = value.strip()
             if type(self.id_genfunc) in (str, unicode):
                 idgenapi.validate_id(self.id_genfunc, value)
-                if idgenapi.is_id_used(self.id_genfunc, value):
-                    raise ValidationError("ID '%s' is already in use." % value)
+                # if validate and idgenapi.is_id_used(self.id_genfunc, value):
+                #     raise ValidationError("ID '%s' is already in use." % value)
             else:
                 print >> sys.stderr, "GenFuncs that are not strings cannot be validated"
                 # otherwise it is a function so call it and call the next
