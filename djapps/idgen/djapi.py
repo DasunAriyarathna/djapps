@@ -47,6 +47,12 @@ def get_or_create_id_generator(name, *args, **kwargs):
         print "ID Generator (%s) already exists." % name
         return get_id_generator(name)
 
+def release_id(generator_or_name, id):
+    generator = generator_or_name
+    if type(generator) in (str, unicode):
+        generator = models.IDGenerator.objects.get(pk = generator)
+    return gen_classes.release_id(generator, id)
+
 def mark_id_as_used(generator_or_name, id):
     """
     Marks a particular ID as having been used.
