@@ -48,7 +48,7 @@ class StringIDField(models.CharField):
     def __init__(self, id_genfunc = "default", key_length = 8, *args, **kwargs):
         assert id_genfunc != None, "%ss must have a valid id_genfunc field value" % self.__class__.__name__
         assert key_length and key_length > 0, "%ss must have a positive key_length" % self.__class__.__name__
-        self.id_genfunc = id_genfunc 
+        self.id_genfunc = id_genfunc
         self.id_generator = None
         self.key_length = key_length
         self.initialised = False
@@ -59,7 +59,6 @@ class StringIDField(models.CharField):
         """
         Returns field's value just before saving.
         """
-        print "Pre Save: Add, Model_Instance: ", add, model_instance 
         if add: # new instance so create a new ID value
             # if the idgen is a string then we can use it as is
             value = getattr(model_instance, self.attname)
@@ -78,7 +77,7 @@ class StringIDField(models.CharField):
                 elif not value:
                     value = idgenapi.get_next_id(self.id_genfunc(model_instance))
             setattr(model_instance, self.attname, value)
-            return value 
+            return value
         else:
             return super(StringIDField, self).pre_save(model_instance, add)
 
