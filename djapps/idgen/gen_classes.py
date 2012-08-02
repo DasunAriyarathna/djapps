@@ -6,6 +6,9 @@ def save_id(generator, id):
     newgenid.save()
     return newgenid
 
+def release_id(generator, id):
+    models.GeneratedID.objects.filter(generator = generator, gen_id = id).delete()
+
 def is_id_used(generator, val):
     if val and generator:
         return models.GeneratedID.objects.filter(generator = generator, gen_id = val).count() > 0
