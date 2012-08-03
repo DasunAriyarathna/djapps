@@ -1,13 +1,12 @@
 
-from djapps.utils import urls         as djurls
+from djapps.utils import urls as djurls
 import djapps.utils as djutils
 
 def dict_from_request(request, get_has_priority = True):
+    filters = {}
     if get_has_priority:
         if request.POST:
             filters = dict(request.POST.items())
-        else:
-            filters = {}
         filters.update(dict(request.GET.items()))
     else:
         filters = dict(request.GET.items())
