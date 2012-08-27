@@ -1,0 +1,7 @@
+syntax: glob
+*.pyc
+*.swp
+settings.py
+manage.py
+tags
+build/*
