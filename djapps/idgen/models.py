@@ -33,6 +33,9 @@ class GeneratedID(models.Model):
     generator   = models.ForeignKey(IDGenerator)
     gen_id      = models.CharField(max_length = 100)
 
+    def __unicode__(self):
+        return unicode("%s:%s" % (self.generator.name, self.gen_id))
+
     class Meta:
         unique_together = (("generator", "gen_id"),)
         ordering = ("generator","gen_id")
