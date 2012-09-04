@@ -28,7 +28,7 @@ def show_queries(func):
             print >> sys.stderr, "    Sql: ", query['sql']
         return result
     return show_queries
-    
+
 def format_response(func):
     """ Takes a result and converts to an appropriate response object.
         A function that uses this as a decorator, must return one of the
@@ -40,10 +40,10 @@ def format_response(func):
         2. A json object - will be stringified and returned.
 
         3. A json object and a path to a template, the json object will be
-        rendered on the template.  
+        rendered on the template.
 
         If no object is returned by the wrapee, then this decorator does
-        nothing (possibly resulting in a django exception.
+        nothing (resulting in a 404).
     """
     def format_response_method(request, *args, **kwargs):
         result  = func(request, *args, **kwargs)
@@ -64,12 +64,13 @@ def format_response(func):
                                               djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
                 if format == "json" or len(result) < 2:
                     response = HttpResponse(djjson.json_encode(result[0]), content_type = JSON_CONTENT_TYPE)
-                    # response["Access-Control-Allow-Origin"] = "*"
-                    # return response
+                elif isinstance(result[1], HttpResponse):
+                    response = result[1]
                 else:
                     from django.template import RequestContext
+                    response_data = result[0]
                     context = RequestContext(request)
-                    response = render_to_response(result[1], result[0], context)
+                    response = render_to_response(result[1], response_data, context)
             else:
                 # else treat as JSON
                 response = HttpResponse(djjson.json_encode(result), content_type = JSON_CONTENT_TYPE)
@@ -79,7 +80,7 @@ def format_response(func):
             return response
     return format_response_method
 
-# 
+#
 # A decorator for ensuring that a method in the request confirms to what is
 # in a given list.
 #
@@ -93,7 +94,7 @@ def ensure_request_type(*methods):
         return ensure_request_type_method
     return ensure_request_type_decorator
 
-# 
+#
 # Sends a "unauthenticated" response for a given request.
 # Usually this will be called from a decorator or a request handler if
 # authentication is required but was not valid or successful.
@@ -112,9 +113,9 @@ def send_unauthenticated_response(request, *args, **kwds):
         return api_result(codes.CODE_UNAUTHENTICATED, "Unable to authenticate user.")
     else:
         return HttpResponseRedirect(djurls.get_login_url(request.path))
-    
-# 
-# Apply an authentication function instead of simply 
+
+#
+# Apply an authentication function instead of simply
 # checking for method types
 #
 def ensure_user_authenticated(auth_function):
@@ -126,8 +127,8 @@ def ensure_user_authenticated(auth_function):
                 return func(request, *args, **kws)
         return ensure_user_authenticated_method
     return ensure_user_authenticated_decorator
-                
-# 
+
+#
 # Same as the ensure_user_authenticated but applies to a class or
 # instance method instead of a global method.
 #
@@ -141,10 +142,10 @@ def ensure_user_authenticated_im(auth_function):
         return ensure_user_authenticated_method
     return ensure_user_authenticated_decorator
 
-# 
+#
 # A decorator for ensuring the user is logged in for given methods.  Eg we
 # may require that POST and PUT methods require user login however GET may
-# not.  
+# not.
 #
 # This is simply a wrapper for the generic authentication decorator that
 # to simply see if the request's method type confirms to the ones we allow

@@ -18,7 +18,7 @@ import  djapps.utils.request        as djrequest
 import  djapps.utils.json           as djjson
 from    djapps.utils                import api_result
 
-# 
+#
 # Processes POST request on the registration form
 #
 # This wont be called directly but by an application specific view!
@@ -30,7 +30,7 @@ from    djapps.utils                import api_result
 # Returns (on a POST method):
 #   Output form with 3 variables:
 #       'form':     The current form - not really necessary
-#       'context':  The form context specified by the caller 
+#       'context':  The form context specified by the caller
 #       'error':    If there were any errors in the creation
 #
 # Otherwise:
@@ -42,7 +42,7 @@ from    djapps.utils                import api_result
 #
 @djdecos.format_response
 def account_register(request,
-             template_name      = 'djapps/auth/register.html', 
+             template_name      = 'djapps/auth/register.html',
              email_template     = "djapps/auth/register-email.txt",
              email_from         = "accounts@thisserver.com",
              email_subject      = "Your Account Confirmation",
@@ -54,12 +54,9 @@ def account_register(request,
     if request.method == 'GET':
         return api_result(codes.CODE_OK, {'context': form_context}), template_name
     elif request.method != 'POST' or request.GET.get("__method__", "") == "post":
-        if format == "json":
-            return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid request method"), template_name
-        else:
-            return HttpResponse("Invalid request type: " + request.method)
+        return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid request method"), template_name
 
-    # 
+    #
     # Create the form the submitted data
     #
     post_data       = request.POST
@@ -77,33 +74,28 @@ def account_register(request,
     if not email:
         return api_result(codes.CODE_GENERAL_ERROR, "Email is mandatory")
 
-    # 
+    #
     # Form is now validated
     #
-    is_active = True 
+    is_active = True
     first_name = last_name = nick_name = ""
     if 'first_name' in post_data: first_name = post_data['first_name']
     if 'last_name' in post_data: last_name = post_data['last_name']
     if 'nick_name' in post_data: nick_name = post_data['nick_name']
     new_user, reg_info, new_created = api.register_user(email, email, password, first_name, last_name, nick_name,
                                                         is_active, request, register_timeout, form_context,
-                                                        UserClass, UserRegClass, email_template,  email_from, 
+                                                        UserClass, UserRegClass, email_template,  email_from,
                                                         email_subject)
     # batch save the registration and user objects
     # if reg_info: save_object(new_user, reg_info)
     # else: save_object(new_user)
 
     if new_created:
-        if format == "json":
-            return api_result(codes.CODE_OK, {'id': str(get_object_id(new_user)),
-                                  'username': new_user.username})
-        else:
-            return HttpResponseRedirect(djurls.get_login_url())
+        return api_result(codes.CODE_OK, {'id': str(get_object_id(new_user)),
+                                  'username': new_user.username}), HttpResponseRedirect(djurls.get_login_url())
     else:
-        if format == "json":
-            return api_result(codes.CODE_USERNAME_TAKEN, "User already exists.  Please enter a new username.")
-        else:
-            return HttpResponse("User already exists.  Please enter a new username")
+        message = "User already exists.  Please enter a new username."
+        return api_result(codes.CODE_USERNAME_TAKEN, message), HttpResponse(message)
 
 def account_login(request,
                   template_name='djapps/auth/login.html',
@@ -135,22 +127,15 @@ def account_login(request,
                 if request.session.test_cookie_worked():
                     request.session.delete_test_cookie()
 
-        if format == "json":
-            if not login_user:
-                return api_result(codes.CODE_AUTH_FAILED, "Authentication failed.")
-            elif not login_user.is_active:
-                return api_result(codes.CODE_ACCOUNT_UNCONFIRMED, "Email confirmation not yet recieved.")
-            else:
-                # user is valid:
-                return api_result(codes.CODE_OK, {'id': str(get_object_id(login_user)),
-                                      'username': login_user.username})
+        if not login_user:
+            return api_result(codes.CODE_AUTH_FAILED, "Authentication failed."), HttpResponseRedirect(djurls.get_login_url())
+        elif not login_user.is_active:
+            return api_result(codes.CODE_ACCOUNT_UNCONFIRMED, "Email confirmation not yet recieved.")
         else:
-            if not login_user:
-                return HttpResponseRedirect(djurls.get_login_url())
-            elif not login_user.is_active:
-                assert False
-            else:
-                return HttpResponseRedirect(redirect_to)
+            # valid user
+            return api_result(codes.CODE_OK,
+                              {'id': str(get_object_id(login_user)),
+                               'username': login_user.username}), HttpResponseRedirect(redirect_to)
 
     request.session.set_test_cookie()
     return {'form': {}, redirect_field_name: redirect_to, }, template_name
@@ -176,7 +161,7 @@ def normal_account_logout(request):
     next_page = djrequest.get_getvar(request, "next", "/")
     return HttpResponseRedirect(next_page or request.path)
 
-# 
+#
 # Confirm the registration - called when the user, clicks on the link in
 # the confirmation email
 #
@@ -212,7 +197,7 @@ def account_confirm(request,
 
     return HttpResponseRedirect('/?present_login=true')
 
-# 
+#
 # GET requests return the settings page.
 # POST requests allow you to update particular settings.  Not all settings
 # have to be updated at the same time.
@@ -233,8 +218,6 @@ def account_settings(request,
     if request.method == 'GET':
         return extra_context, template_name
     elif request.method != 'POST':
-        if format == "json":
-            return api_result(codes.CODE_NOTALLOWEDMETHOD, "Invalid request method")
-        else:
-            return HttpResponse("Invalid request type: " + request.method)
+        message = "Invalid request type: " + request.method
+        return api_result(codes.CODE_NOTALLOWEDMETHOD, message), HttpResponse(message)
 
