@@ -19,7 +19,7 @@ def GetOutputFormat(request, fmt_spec = 'format'):
 
     return None
 
-# 
+#
 # Checks if user is authenticated and that the request method matches
 #
 # Returns None if checks passed,
@@ -38,39 +38,8 @@ def CheckAuthAndReqMethod(request, method = None):
 
     return None
 
-# 
-# Formats an object to the appropriate output - determined by the
-# output_fmt value.
 #
-# Following choices for output_fmt are available:
-#   json        -   Output as json 
-#   xml         -   Output as xml (not yet implemented)
-#
-#   XXX         -   Otherwise use the template specified by XXX
-#
-# By default output_fmt points to a generic default template.
-#
-# SO if you dont know any templates, do not specify them.
-#
-def FormatHttpResponse(response, output_fmt = "json"):
-    # 
-    # Send out json for now
-    #
-    if output_fmt is None or output_fmt == '':
-        output_fmt = "json"
-
-    lower = output_fmt.lower()
-
-    if lower == "json":
-        return HttpResponse(json_encode(response))
-
-    if lower == "xml":
-        return HttpResponse("XML Output Not Yet Implemented")
-
-    return render_to_response(output_fmt, response)
-
-# 
-# Remove duplicates in a list 
+# Remove duplicates in a list
 # Warning - list WILL be sorted
 #
 def remove_duplicates(list, compfunc = None):
