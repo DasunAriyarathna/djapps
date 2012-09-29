@@ -17,8 +17,14 @@ def APIResponse(request, result, mimetype=None, status=None,
         import request as djrequest
         format = djrequest.get_var(request, format_param, "")
         if format == "json":
-            response = HttpResponse(djjson.json_encode(result, **(formatter_params or {})),
-                                    content_type = content_type or JSON_CONTENT_TYPE)
+            formatter_params = formatter_params or {}
+            content_type = content_type or JSON_CONTENT_TYPE
+            if type(formatter_params) is list:
+                response = HttpResponse(djjson.json_encode(result, *formatter_params),
+                                        content_type = content_type)
+            else:
+                response = HttpResponse(djjson.json_encode(result, **formatter_params),
+                                        content_type = content_type)
         else:
             from django.template import RequestContext
             response_data = result[0]
