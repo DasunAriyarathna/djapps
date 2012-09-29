@@ -1,6 +1,5 @@
 
 import sys
-
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 
@@ -75,8 +74,7 @@ def format_response(func):
                 # else treat as JSON
                 response = HttpResponse(djjson.json_encode(result), content_type = JSON_CONTENT_TYPE)
             response["Access-Control-Allow-Origin"] = "*"
-            if content_type:
-                response["Content-Type"] = content_type
+            if content_type: response["Content-Type"] = content_type
             return response
     return format_response_method
 
