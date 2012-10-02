@@ -6,10 +6,10 @@ from django.utils import simplejson
 from django.utils.simplejson import decoder
 
 class OurJsonEncoder(simplejson.JSONEncoder):
-    def default(self, o):
+    def default(self, o, *args, **kwargs):
         if type(o) is datetime.datetime: return str(o)
-        elif hasattr(o, "to_json"): return o.to_json()
-        elif hasattr(o, "toJson"): return o.toJson()
+        elif hasattr(o, "to_json"): return o.to_json(*args, **kwargs)
+        elif hasattr(o, "toJson"): return o.toJson(*args, **kwargs)
         elif isinstance(o, Exception):
             return {'args': o.args, 'message': o.message}
         elif isinstance(o, djangoforms.BaseForm):
@@ -23,8 +23,8 @@ class OurJsonEncoder(simplejson.JSONEncoder):
             print "Unknown type: ", type(o)
         return super(OurJsonEncoder, self).default(o)
 
-def json_encode(data):
-    return OurJsonEncoder().encode(data)
+def json_encode(data, *args, **kwargs):
+    return OurJsonEncoder().encode(data, *args, **kwargs)
 
 def json_decode(data):
     if data:
