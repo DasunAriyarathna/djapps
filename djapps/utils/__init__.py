@@ -7,8 +7,10 @@ API_FAILURES    = "failures"
 # 
 # Generates an api output structure indicating success
 #
-def api_result(code, value):
-    return {'code': code, 'value': value}
+def api_result(code, value, **kwparams):
+    out = {'code': code, 'value': value}
+    out.update(kwparams)
+    return out
 
 def to_str_keys(indict):
     """
