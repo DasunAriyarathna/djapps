@@ -11,6 +11,7 @@ class Http403Middleware(object):
             # Return None so django doesn't re-raise the exception
             return None
 
+        callback = None
         try:
             # Handle import error but allow any type error from view
             callback = getattr(import_module(settings.ROOT_URLCONF),'handler403')
@@ -20,7 +21,6 @@ class Http403Middleware(object):
                     callback = eval(callback[0])
                 else:
                     callback = getattr(import_module(".".join(callback[:-1])), callback[-1])
-            return callback(request,exception)
         except (ImportError,AttributeError):
             # Try to get a 403 template
             try:
@@ -47,4 +47,5 @@ class Http403Middleware(object):
              })
 
             return HttpResponseForbidden(t.render(c))
+        return callback(request,exception)
 
