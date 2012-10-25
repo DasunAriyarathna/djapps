@@ -15,7 +15,11 @@ class Http403Middleware(object):
             # Handle import error but allow any type error from view
             callback = getattr(import_module(settings.ROOT_URLCONF),'handler403')
             if type(callback) in (str, unicode):
-                callback = eval(callback)
+                callback = callback.split(".")
+                if len(callback) == 1:
+                    callback = eval(callback[0])
+                else:
+                    callback = getattr(import_module(".".join(callback[:-1])), callback[-1])
             return callback(request,exception)
         except (ImportError,AttributeError):
             # Try to get a 403 template

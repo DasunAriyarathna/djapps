@@ -112,7 +112,7 @@ def send_unauthenticated_response(request, *args, **kwds):
         return api_result(codes.CODE_UNAUTHENTICATED, "Unable to authenticate user.")
     else:
         from djapps.utils import exceptions
-        raise exceptions.Http403
+        raise exceptions.Http403, "0"
         return HttpResponseRedirect(djurls.get_login_url(request.path))
 
 #
