@@ -1,7 +1,8 @@
 
 import sys
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, Http404
+from django.core.exceptions import PermissionDenied
 
 from . import api_result, codes
 import json as djjson
@@ -110,6 +111,8 @@ def send_unauthenticated_response(request, *args, **kwds):
     if format == "json":
         return api_result(codes.CODE_UNAUTHENTICATED, "Unable to authenticate user.")
     else:
+        from djapps.utils import exceptions
+        raise exceptions.Http403
         return HttpResponseRedirect(djurls.get_login_url(request.path))
 
 #
