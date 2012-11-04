@@ -20,7 +20,7 @@ def APIResponse(request, code, result, template_name = None, redirect_to = None,
         if code is not None: result = {'code': 0, 'value': result}
         if format == "raw":
             return result
-        elif format == "json":
+        elif format == "json" or not template_name:
             formatter_params = formatter_params or {}
             content_type = content_type or JSON_CONTENT_TYPE
             if type(formatter_params) is list:
