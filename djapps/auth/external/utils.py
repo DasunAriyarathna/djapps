@@ -38,7 +38,6 @@ def load_site_authenticators():
         auth_module     = import_module(auth_obj['auth_module'])
         auth_class      = getattr(auth_module, auth_obj['auth_class'])
 
-        print "Module Contents: ", dir(auth_module)
         print "Auth Class: ", auth_class
         print "Auth Class Params: ", auth_obj
 
