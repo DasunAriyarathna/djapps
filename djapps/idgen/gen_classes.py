@@ -1,5 +1,7 @@
 
 import random, utils, models
+import logging
+logger = logging.getLogger(__name__)
 
 def save_id(generator, id):
     newgenid = models.GeneratedID(generator = generator, gen_id = id)
@@ -21,13 +23,15 @@ def mark_id_as_used(generator, val):
             save_id(generator, val)
             return True
         except IntegrityError, e:
-            print "Error: Rand ID Value (%s) already exists. Trying again..." % val
+            logger.error("Rand ID Value (%s) already exists. Trying again..." % val)
             try: transaction.rollback()
-            except Exception, e: print "Rollback Error: ", e.message
+            except Exception, e:
+                logger.error("Rollback Error: %s" % e.message)
         except DatabaseError, e:
-            print "Error: Rand ID Value (%s) already exists. Trying again..." % val
+            logger.error("Rand ID Value (%s) already exists. Trying again..." % val)
             try: transaction.rollback()
-            except Exception, e: print "Rollback Error: ", e.message
+            except Exception, e:
+                logger.error("Rollback Error: %s" % e.message)
     return False
 
 class IDGenerator(object):
@@ -143,7 +147,7 @@ class IDGeneratorLFSR(IDGenerator):
                     return val
                 except:
                     # reload generator state
-                    print >> sys.stderr, "Generator state update failed, Trying again..."
+                    logger.debug("Generator state update failed, Trying again...")
                     state   = models.IDGeneratorLFSR.objects.filter(generator = generator).all()[0]
                     assert state, "Generator state may have been deleted"
 

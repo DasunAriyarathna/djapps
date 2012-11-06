@@ -58,6 +58,7 @@ from openid.consumer import discover
 from openid.extensions import pape, sreg
 import fetcher
 import store
+import logging ; logger = logging.getLogger(__name__)
 
 # Set to True if stack traces should be shown in the browser, etc.
 _DEBUG = False
@@ -300,15 +301,15 @@ class LoginHandler(Handler):
       self.report_error('Please enter an OpenID URL.')
       return
 
-    print >> sys.stderr, "------------------------------------------------------"
-    print >> sys.stderr, ('Beginning discovery for OpenID %s' % openid_url)
+    logger.debug("------------------------------------------------------")
+    logger.debug('Beginning discovery for OpenID %s' % openid_url)
     try:
       consumer = self.get_consumer()
       if not consumer:
         return
       auth_request = consumer.begin(openid_url)
     except discover.DiscoveryFailure, e:
-      self.report_error('Error during OpenID provider discovery.', e)
+      logger.error('Error during OpenID provider discovery: %s' % e)
       return
     except discover.XRDSError, e:
       self.report_error('Error parsing XRDS from provider.', e)
@@ -360,14 +361,14 @@ class FinishHandler(Handler):
       sreg_data = sreg.SRegResponse.fromSuccessResponse(response).items()
       pape_data = pape.Response.fromSuccessResponse(response)
 
-      print >> sys.stderr, "========================================================"
-      print >> sys.stderr, "SregData: ", sreg_data
+      logger.debug("========================================================")
+      logger.debug("SregData: %s" % str(sreg_data))
       self.session.claimed_id = response.endpoint.claimed_id
       self.session.server_url = response.endpoint.server_url
     elif response.status == 'failure':
       logging.error(str(response))
 
-    logging.debug('Login status %s for claimed_id %s' %
+    logger.debug('Login status %s for claimed_id %s' %
                   (response.status, self.session.claimed_id))
 
     if self.session.store_and_display:

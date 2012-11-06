@@ -1,6 +1,8 @@
 
-import models
 from django.contrib import admin as djangoadmin
+import models
+import logging
+logger = logging.getLogger(__name__)
 
 class IDGeneratorAdmin(djangoadmin.ModelAdmin):
     list_display = ("name","gen_type","allowed_chars","key_length")
@@ -17,5 +19,5 @@ try:
 except:
     import sys, traceback
     traceback.print_exc()
-    print >> sys.stderr, "ID Gen Already Registered..."
+    logger.error("ID Gen Already Registered...")
 

@@ -39,8 +39,6 @@ class ResourceHandler(object):
     #
     @classmethod
     def default_handler(cls, request, format, action = None, objid = None):
-        print "Action: ", action
-        print "Object: ", objid, type(objid)
         from django.http import Http404
         return Http404()
 

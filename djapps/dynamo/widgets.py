@@ -48,7 +48,6 @@ class DateTimeWidget(Widget):
         The 'value' given is not guaranteed to be valid input, so subclass
         implementations should program defensively.
         """
-        print "In render, name, value, attrs: ", name, value, attrs
         return mark_safe(u'<div%s>%s</div>' % (flatatt(final_attrs), conditional_escape(force_unicode(value))))
 
     def build_attrs(self, extra_attrs=None, **kwargs):
@@ -56,7 +55,6 @@ class DateTimeWidget(Widget):
         attrs = dict(self.attrs, **kwargs)
         if extra_attrs:
             attrs.update(extra_attrs)
-        print "In build_attrs, attrs, extra_attrs, kwargs: ", self.attrs, extra_attrs, kwargs
         return attrs
 
     def value_from_datadict(self, data, files, name):
@@ -64,7 +62,6 @@ class DateTimeWidget(Widget):
         Given a dictionary of data and this widget's name, returns the value
         of this widget. Returns None if it's not provided.
         """
-        print "In value_from_datadict, data, files, name: ", data, files, name
         return data.get(name, None)
 
     def id_for_label(self, id_):
@@ -77,7 +74,6 @@ class DateTimeWidget(Widget):
         return an ID value that corresponds to the first ID in the widget's
         tags.
         """
-        print "In id_for_label, id_: ", id_
         return id_
     id_for_label = classmethod(id_for_label)
 

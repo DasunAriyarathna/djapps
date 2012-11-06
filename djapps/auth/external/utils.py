@@ -1,6 +1,7 @@
 
 import models as authextmodels
 from django.utils.importlib import import_module
+import logging ; logger = logging.getLogger(__name__)
 
 def load_authenticator_class(full_auth_class):
     try:
@@ -38,8 +39,8 @@ def load_site_authenticators():
         auth_module     = import_module(auth_obj['auth_module'])
         auth_class      = getattr(auth_module, auth_obj['auth_class'])
 
-        print "Auth Class: ", auth_class
-        print "Auth Class Params: ", auth_obj
+        logger.debug("Auth Class: %s" % str(auth_class))
+        logger.debug("Auth Class Params: " % str(auth_obj))
 
         auth_instance   = auth_class(**auth_obj)
         auth_instance.host_site  = get_first_object(authextmodels.HostSite,

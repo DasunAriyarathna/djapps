@@ -2,8 +2,6 @@
 import djapps, sys
 import djapps.dynamo
 
-print >> sys.stderr, dir(djapps.dynamo)
-
 from djapps.dynamo import helpers as djhelpers
 
 import models, sys
