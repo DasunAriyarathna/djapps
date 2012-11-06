@@ -11,20 +11,21 @@ HTML_CONTENT_TYPE = "text/html"
 JSON_CONTENT_TYPE = "application/json"
 # JSON_CONTENT_TYPE = "text/html"
 
+import logging
+logger = logging.getLogger(__name__)
+
 def show_queries(func):
     """
-    A decorator that prints out the queries used by a function and the
+    A decorator that logs the queries used by a function and the
     times taken for them.
     """
     from django.db import connection
     def show_queries(*args, **kwargs):
         result = func(*args, **kwargs)
-        print >> sys.stderr, "Method: ", func
-        print >> sys.stderr, "Queries: "
+        logger.info("Queries for Method: %s" % func)
         for query in connection.queries:
-            print >> sys.stderr, "=" * 80
-            print >> sys.stderr, "    Time: ", query['time']
-            print >> sys.stderr, "    Sql: ", query['sql']
+            logger.info("    Time: %f", query['time'])
+            logger.info("    Sql: %s", query['sql'])
         return result
     return show_queries
 

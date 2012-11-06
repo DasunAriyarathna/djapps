@@ -6,6 +6,8 @@ import datetime, os, sys, logging
 
 import djmodels as dnmod
 
+import logging ; logger = logging.getLogger(__name__)
+
 #
 # A quick transaction enabled function to
 # save a bunch of db objects.
@@ -65,7 +67,6 @@ def delete_objects(objs):
 # Delete all objects in a class
 #
 def delete_all_objects(obj_class):
-    print >> sys.stderr, "Deleting all dj objects of class ", obj_class
     obj_class.objects.all().delete()
 
 #
@@ -160,7 +161,7 @@ def register_models(app_name, *model_list):
     pending_references  = {}
 
     for model in model_list:
-        print >> sys.stderr, "Processing %s.%s model" % (app_name, model._meta.object_name)
+        logger.debug("Processing %s.%s model" % (app_name, model._meta.object_name))
         if connection.introspection.table_name_converter(model._meta.db_table) in tables:
             continue
         sql, references = connection.creation.sql_create_model(model, style, seen_models)
@@ -172,7 +173,7 @@ def register_models(app_name, *model_list):
                 sql.extend(connection.creation.sql_for_pending_references(refto, style, pending_references))
         sql.extend(connection.creation.sql_for_pending_references(model, style, pending_references))
 
-        print >> sys.stderr, "Creating table %s", model._meta.db_table
+        logger.debug("Creating table %s" % model._meta.db_table)
         for statement in sql:
             cursor.execute(statement)
         tables.append(connection.introspection.table_name_converter(model._meta.db_table))
@@ -182,7 +183,7 @@ def register_models(app_name, *model_list):
         if model in created_models:
             sql = connection.creation.sql_for_many_to_many(model, style)
             if sql:
-                print >> sys.stderr, "Creating m2m tbales for %s.%s model" % (app_name, model._meta.object_name)
+                logger.debug("Creating m2m tbales for %s.%s model" % (app_name, model._meta.object_name))
                 for statement in sql:
                     cursor.execute(statement)
 

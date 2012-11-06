@@ -1,5 +1,6 @@
 
 from models import DJCounter
+import logging ; logger = logging.getLogger(__name__)
 
 try:
     from django.contrib import admin as djangoadmin
@@ -7,5 +8,5 @@ try:
 except:
     import sys, traceback
     traceback.print_exc()
-    print >> sys.stderr, "Dynamo Models Already Registered..."
+    logger.error("Dynamo Models Already Registered.")
 

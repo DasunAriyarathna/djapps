@@ -2,6 +2,8 @@ import random, sys, models, constants, math, utils, gen_classes
 from django.conf import settings
 from django import db as djangodb
 from django.core.exceptions import ValidationError
+import logging
+logger = logging.getLogger(__name__)
 
 def get_id_generator(name):
     """
@@ -44,7 +46,7 @@ def get_or_create_id_generator(name, *args, **kwargs):
     try:
         return create_id_generator(name, *args, **kwargs)
     except djangodb.DatabaseError, ie:
-        print "ID Generator (%s) already exists." % name
+        logger.debug("ID Generator (%s) already exists." % name)
         return get_id_generator(name)
 
 def release_id(generator_or_name, id):

@@ -5,6 +5,7 @@ import djapps.utils.request     as djrequtils
 from django.http import HttpResponse
 from djapps.auth.external.authenticators import Authenticator
 from djapps.dynamo.helpers import get_or_create_object, get_first_object
+import logging ; logger = logging.getLogger(__name__)
 
 try:
     from threading import local
@@ -210,7 +211,7 @@ class AuthFacebook(Authenticator):
             for key in request.set_fb_cookies.keys():
                 cookie_key = str(key)
                 cookie_val = str(request.set_fb_cookies[key])
-                print >> sys.stderr, "============Setting FB Cookies: ", cookie_key, cookie_val
+                logger.debug("============Setting FB Cookies: %s:%s" % (cookie_key, cookie_val))
                 response.set_cookie(cookie_key, cookie_val)
 
         # request.ms_session[self.FB_SESSION_DELETE] = False

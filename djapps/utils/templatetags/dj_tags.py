@@ -24,7 +24,7 @@ def djregisterlink(value, arg):
     return djurls.get_register_url(arg)
 
 #
-# The tag for objid.  Simpler way to print the id of an object regardless
+# The tag for objid.  Simpler way to get the id of an object regardless
 # of GAE or django.
 #
 @register.tag(name = "objid")

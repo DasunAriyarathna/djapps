@@ -1,4 +1,6 @@
 import code, getpass, sys, os
+import logging
+logger = logging.getLogger(__name__)
 
 def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/google_appengine"):
     if gae_path not in sys.path:
@@ -19,7 +21,6 @@ def setup_gae_console(app_id, host = "localhost:8080", gae_path = "/opt/google/g
     return register_stubs(app_id, host)
 
 def register_stubs(app_id, host):
-    print sys.path
     import google
     import google.appengine
     from google.appengine.ext import remote_api
@@ -36,7 +37,7 @@ def register_stubs(app_id, host):
 
     # disable proxy for local hosts
     if  host.lower().find("localhost") >= 0:
-        print "Deploying to development server: ", host, "...."
+        logger.info("Deploying to development server: %s..." % host)
         os.environ['http_proxy']    = ""
         os.environ['HTTP_PROXY']    = ""
         os.environ['https_proxy']   = ""
@@ -44,12 +45,12 @@ def register_stubs(app_id, host):
         secure                      = False
         production                  = False
     else:
-        print "Deploying to production server: ", host, "...."
+        logger.info("Deploying to production server: %s..." % host)
         secure                      = True 
         production                  = True
 
     def auth_func():
-        print "Authenticating....."
+        logger.info("Authenticating...")
         username = os.environ.get("GAE_USERNAME", None)
         password = os.environ.get("GAE_PASSWORD", None)
         if username is None:

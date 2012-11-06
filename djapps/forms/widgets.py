@@ -10,6 +10,8 @@ from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils.formats import get_format
 from django.conf import settings
+import logging
+logger = logging.getLogger(__name__)
 
 __all__ = ('SelectDateTimeWidget',)
 
@@ -82,7 +84,8 @@ class SelectDateTimeWidget(Widget):
             hour_val, minute_val, second_val    = value.hour, value.minute, value.second
 
         # now the actual render
-        format = get_format('DATE_INPUT_FORMATS')[0] ; print "Date Format: ", format
+        format = get_format('DATE_INPUT_FORMATS')[0]
+        logger.debug("Date Format: %s" % format)
         date_html = self.render_date(name, year_val, month_val, day_val, format)
         time_html = self.render_time(name, hour_val, minute_val, second_val, format)
         return mark_safe(date_html + time_html)
@@ -150,7 +153,7 @@ class SelectDateTimeWidget(Widget):
                 try:
                     date_value = datetime.datetime(int(y), int(m), int(d), int(hr), int(min), int(sec))
                 except ValueError, ve:
-                    print "Value Error: ", ve
+                    logger.error("Value Error: %s", ve)
                     pass
                 else:
                     date_value = datetime_safe.new_date(date_value)

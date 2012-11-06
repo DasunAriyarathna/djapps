@@ -4,6 +4,8 @@ from django.db import models
 from django.forms import fields as djfields
 from django.core.exceptions import ValidationError
 import api as idgenapi
+import logging
+logger = logging.getLogger(__name__)
 
 class StringIDFormField(djfields.CharField):
     def __init__(self, *args, **kwargs):
@@ -31,7 +33,7 @@ class StringIDFormField(djfields.CharField):
                 # if validate and idgenapi.is_id_used(self.id_genfunc, value):
                 #     raise ValidationError("ID '%s' is already in use." % value)
             else:
-                print >> sys.stderr, "GenFuncs that are not strings cannot be validated"
+                logger.debug("GenFuncs that are not strings cannot be validated")
                 # otherwise it is a function so call it and call the next
                 # id on the returned the idgen as we could have runtime
                 # idgens
