@@ -19,8 +19,6 @@ class SkippableProxyHandler(urllib2.BaseHandler):
             self.noproxy_handler = urllib2.HTTPHandler()
 
     def http_open(self, req, proxy, type):
-        print "Type, Req, ReqDir: ", type, req, dir(req)
-        print "Host: ", req.get_host()
         if True:
             self.proxy_handler.proxy_open(req, proxy, type)
         else:
