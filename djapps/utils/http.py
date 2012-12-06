@@ -31,6 +31,8 @@ def APIResponse(request, code, result, template_name = None, redirect_to = None,
         else:
             from django.template import RequestContext
             context = RequestContext(request)
+            if hasattr(template_name, "__call__"):
+                template_name = template_name(request)
             response = render_to_response(template_name, result, context, mimetype = mimetype)
     if content_type: response["Content-Type"] = content_type
     response["Access-Control-Allow-Origin"] = "*"
