@@ -34,8 +34,7 @@ from    .       import      api_result
 @djdecos.format_response
 def manual_resource_handler(request, handler_class, handler_suffix,
                             method_param = "__method__", *args, **kwargs):
-    format = djrequest.get_getvar(request, settings.FORMAT_PARAM,
-                                  djrequest.get_postvar(request, settings.FORMAT_PARAM, ""))
+    format = djrequest.get_var(request, settings.FORMAT_PARAM)
     method = request.method.lower()
     if method_param in request.GET:
         # Override/simulate methods not supported in the browser by
