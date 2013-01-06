@@ -82,5 +82,7 @@ class DefaultRestHandler(object):
         real_handler.__getdoc__ = get_method and get_method.__doc__ or ""
         real_handler.__postdoc__ = post_method and post_method.__doc__ or ""
         real_handler.__doc__ = default_method and default_method.__doc__ or ""
+        real_handler.__name__ = "%s.handler_%s" % (cls.__name__, suffix)
+        real_handler.__module__ = cls.__module__
         return resturl(regex, cls, suffix, kwargs, name, prefix, handler_function = real_handler)
 
