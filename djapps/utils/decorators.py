@@ -77,6 +77,7 @@ def format_response(func):
             response["Access-Control-Allow-Origin"] = "*"
             if content_type: response["Content-Type"] = content_type
             return response
+    format_response_method.__doc__ = func.__doc__
     return format_response_method
 
 #
