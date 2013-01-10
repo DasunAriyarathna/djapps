@@ -71,7 +71,7 @@ class DefaultRestHandler(object):
         return themethod
 
     @classmethod
-    def RestUrl(cls, regex, suffix, kwargs = None, name = None, prefix=''):
+    def RestUrl(cls, regex, suffix, kwargs = None, name = None, prefix='', title = '', urldocs = ""):
         get_method = cls.handler_for_method("get", suffix, False, False)
         post_method = cls.handler_for_method("post", suffix, False, False)
         default_method = cls.handler_for_method("default", suffix, False, False)
@@ -84,5 +84,16 @@ class DefaultRestHandler(object):
         real_handler.__doc__ = default_method and default_method.__doc__ or ""
         real_handler.__name__ = "%s.handler_%s" % (cls.__name__, suffix)
         real_handler.__module__ = cls.__module__
+        real_handler.__title__ = title
+        if not urldocs: urldocs = ["get", "post", "default"]
+        if type(urldocs) in (str, unicode):
+            real_handler.__urldocs__ = urldocs
+        elif type(urldocs) is list:
+            real_handler.__urldocs__ = ""
+            for ud in urldocs:
+                method = cls.handler_for_method(ud, suffix, False, False)
+                if method and method.__doc__:
+                    real_handler.__urldocs__ += method.__doc__
+            real_handler.__urldocs__ = urldocs
         return resturl(regex, cls, suffix, kwargs, name, prefix, handler_function = real_handler)
 
