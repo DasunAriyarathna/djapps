@@ -6,13 +6,20 @@ def dict_from_request(request, get_has_priority = True):
     filters = {}
     if get_has_priority:
         if request.POST:
-            filters = dict(request.POST.items())
-        filters.update(dict(request.GET.items()))
+            filters = query_dict_items(request.POST)
+        filters.update(query_dict_items(request.GET))
     else:
-        filters = dict(request.GET.items())
+        filters = query_dict_items(request.GET)
         if request.POST:
-            filters.update(dict(request.POST.items()))
+            filters.update(query_dict_items(request.POST))
     return djutils.to_str_keys(filters)
+
+def query_dict_items(qdict):
+    items = qdict.lists()
+    out = {}
+    for k,l in qdict.lists():
+        out[k] = len(l) > 1 and l or l[0]
+    return out
 
 def get_getvar(request, variable, default = "", converter = None, **converter_args):
     if request.GET and variable in request.GET:
