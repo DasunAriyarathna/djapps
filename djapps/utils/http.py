@@ -17,7 +17,7 @@ def APIResponse(request, code, result, template_name = None, redirect_to = None,
     else:
         import request as djrequest
         format = djrequest.get_var(request, format_param, "")
-        if code is not None: result = {'code': 0, 'value': result}
+        if code is not None: result = {'code': code, 'value': result}
         if format == "raw":
             return result
         elif format == "json" or not template_name:
