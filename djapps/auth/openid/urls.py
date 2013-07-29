@@ -1,5 +1,5 @@
 
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from djapps.auth.openid import views as djoicviews
 
 urlpatterns = patterns('',
