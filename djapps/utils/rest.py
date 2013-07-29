@@ -4,7 +4,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 import  decorators      as  djdecos
 import  request         as  djrequest
