@@ -1,18 +1,28 @@
 
+import urlparse
 from djapps.utils import urls as djurls
 import djapps.utils as djutils
 
 def dict_from_request(request, get_has_priority = True):
-    filters = {}
+    """
+    Returns a dict with merged GET and POST parameters.
+    If get_has_priority is True GET overrides POST else the other way round.
+    """
+    def get_post_data_as_dict(request):
+        if request.POST:
+            return query_dict_items(request.POST)
+        elif request.body:
+            return dict(urlparse.parse_qsl(request.body))
+        return {}
+
     if get_has_priority:
-        if request.POST:
-            filters = query_dict_items(request.POST)
-        filters.update(query_dict_items(request.GET))
-    else:
-        filters = query_dict_items(request.GET)
-        if request.POST:
-            filters.update(query_dict_items(request.POST))
-    return djutils.to_str_keys(filters)
+        params = get_post_data_as_dict(request)
+        params.update(query_dict_items(request.GET))
+        return params
+    
+    params = query_dict_items(request.GET)
+    params.update(get_post_data_as_dict(request))
+    return params
 
 def query_dict_items(qdict):
     items = qdict.lists()
