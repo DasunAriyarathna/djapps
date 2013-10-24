@@ -34,14 +34,15 @@ from    .       import      api_result
 @djdecos.format_response
 def manual_resource_handler(request, handler_class, handler_suffix,
                             method_param = "__method__", *args, **kwargs):
-    format = djrequest.get_var(request, settings.FORMAT_PARAM)
-    method = request.method
-    if method_param in request.GET:
+    #format = djrequest.get_var(request, settings.FORMAT_PARAM)
+    #method = request.method
+    #if method_param in request.GET:
         # Override/simulate methods not supported in the browser by
         # specifying as a get param
-        method = request.GET[method_param]
+    #    method = request.GET[method_param]
 
-    themethod = handler_class.handler_for_method(method, handler_suffix)
+    #themethod = handler_class.handler_for_method(method, handler_suffix)
+    themethod = handler_class.handler_for_method(request.method, handler_suffix)
     return themethod(request, format, *args, **kwargs)
 
 def resturl(regex, handler_class, suffix,
