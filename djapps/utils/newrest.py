@@ -73,6 +73,24 @@ class DefaultRestHandler(object):
 
     @classmethod
     def RestUrl(cls, regex, suffix, kwargs = None, name = None, prefix='', title = '', urldocs = ""):
+        """
+        A note on making the trailing slash optional: Some developers prefer a
+        trailing slash, some don't. Perhaps we will have developers using our
+        api and they are not used to add a trailing slash (like me). So they
+        forget it, as Christine did once. No problem for Django because Django
+        will try to add a trailing slash (APPEND_SLASH setting) and redirect.
+        All good? No. Redirects do not carry POST data which is lost. Neither
+        does our Django with Gunicorn behind Nginx keep the schema (https)
+        which leaves us vulnerable.
+        So why not making the trailing slash optional? Sounds like a wonderful
+        solution. The only drop of bitterness is that no two urls should serve
+        the same content. This is especially important for analytics. Perhaps
+        it will get important later but I am sure it will save a lot more time
+        now than it could possibly cost later.
+        Fin
+        """
+        if regex.endswith('/$'):
+            regex = regex[:-1] + '?$'
         get_method = cls.handler_for_method("get", suffix, False, False)
         post_method = cls.handler_for_method("post", suffix, False, False)
         default_method = cls.handler_for_method("default", suffix, False, False)
