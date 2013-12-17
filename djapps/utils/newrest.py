@@ -34,23 +34,22 @@ from    .       import      api_result
 @djdecos.format_response
 def manual_resource_handler(request, handler_class, handler_suffix,
                             method_param = "__method__", *args, **kwargs):
-    #format = djrequest.get_var(request, settings.FORMAT_PARAM)
-    #method = request.method
-    #if method_param in request.GET:
-        # Override/simulate methods not supported in the browser by
-        # specifying as a get param
-    #    method = request.GET[method_param]
-
-    #themethod = handler_class.handler_for_method(method, handler_suffix)
+    """
+    What does this do?
+    """
     themethod = handler_class.handler_for_method(request.method, handler_suffix)
     return themethod(request, format, *args, **kwargs)
 
 def resturl(regex, handler_class, suffix,
             kwargs = None, name = None, prefix='',
             handler_function = manual_resource_handler):
-    if not kwargs: kwargs = {}
-    kwargs['handler_class']     = handler_class
-    kwargs['handler_suffix']    = suffix
+    """
+    Generates Django's url.
+    """
+    if not kwargs:
+        kwargs = {}
+    kwargs['handler_class'] = handler_class
+    kwargs['handler_suffix'] = suffix
     return url(regex, handler_function, kwargs, name, prefix)
 
 class DefaultRestHandler(object):
@@ -58,7 +57,11 @@ class DefaultRestHandler(object):
     An OO style accessor for the resturl
     """
     @classmethod
-    def handler_for_method(handler_class, method, handler_suffix, use_default = True, raise_on_no_method = True):
+    def handler_for_method(handler_class, method, handler_suffix,
+                           use_default=True, raise_on_no_method=True):
+        """
+        Returns the specific method of the handler to answer this request.
+        """
         method = method.strip().lower()
         methodname = method + "_handler_" + handler_suffix
         themethod = getattr(handler_class, methodname, None)
@@ -72,7 +75,8 @@ class DefaultRestHandler(object):
         return themethod
 
     @classmethod
-    def RestUrl(cls, regex, suffix, kwargs = None, name = None, prefix='', title = '', urldocs = ""):
+    def RestUrl(cls, regex, suffix, kwargs=None, name=None, prefix='',
+                title='', urldocs=""):
         """
         A note on making the trailing slash optional: Some developers prefer a
         trailing slash, some don't. Perhaps we will have developers using our
@@ -89,6 +93,17 @@ class DefaultRestHandler(object):
         now than it could possibly cost later.
         Fin
         """
+        if 0:
+            print
+            print 'RestUrl'
+            print 'regex:', regex
+            print 'suffix:', suffix
+            print 'kwargs:', kwargs
+            print 'name:', name
+            print 'prefix:', prefix
+            print 'title:', title
+            print 'urldocs:', urldocs
+
         if regex.endswith('/$'):
             regex = regex[:-1] + '?$'
         get_method = cls.handler_for_method("get", suffix, False, False)
@@ -104,7 +119,8 @@ class DefaultRestHandler(object):
         real_handler.__name__ = "%s.handler_%s" % (cls.__name__, suffix)
         real_handler.__module__ = cls.__module__
         real_handler.__title__ = title
-        if not urldocs: urldocs = ["get", "post", "default"]
+        if not urldocs:
+            urldocs = ["get", "post", "default"]
         if type(urldocs) in (str, unicode):
             real_handler.__urldocs__ = urldocs
         elif type(urldocs) is list:
