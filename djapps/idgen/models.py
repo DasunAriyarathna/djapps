@@ -22,6 +22,12 @@ class IDGenerator(models.Model):
     # The number of bits would be ceil(log2(allowed_chars ^ key_length))
     key_length      =   models.IntegerField(default = 8)
 
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
+
     class Meta:
         verbose_name = "ID Generator"
 
